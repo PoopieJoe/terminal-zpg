@@ -1,4 +1,4 @@
-import core
+import src.core as core
 
 def main():
     game = core.Core()
