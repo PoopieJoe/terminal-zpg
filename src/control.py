@@ -1,4 +1,5 @@
 import src.character as char
+import src.world as world
 
 class Controller:
     def __init__(
@@ -6,5 +7,7 @@ class Controller:
     ):
         newchar = char.Character()
         newchar.generate()
-        print(newchar)
+        
+        newworld = world.World()
+        newworld.generate()
         return

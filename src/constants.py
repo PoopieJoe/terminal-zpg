@@ -160,3 +160,15 @@ class StatModifiers(CONSTANTOBJECT):
         row = self._getRowNum(stat)
         return self._modmatrix[row][:]
 STATMODS = StatModifiers(attrobj=ATTRIBUTES,statsobj=STATS)
+
+
+
+    # World
+class WorldTileTypes(CONSTANTOBJECT):
+    def __init__(self):
+        super().__init__()
+        self.PLAINS = "Plains"
+        self.FOREST = "Forest"
+        self.DESERT = "Desert"
+        self.OCEAN = "Ocean"
+WORLDTILETYPES = WorldTileTypes()
