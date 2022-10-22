@@ -9,7 +9,6 @@ class Core:
     ):
         self.ui = ui.GUI()
         self.controller = control.Controller()
-        self.launch()
         return
 
     def launch(
