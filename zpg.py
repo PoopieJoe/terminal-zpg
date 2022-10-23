@@ -3,6 +3,7 @@ import src.core as core
 def main():
     game = core.Core()
     game.launch()
+    exit()
 
 
 

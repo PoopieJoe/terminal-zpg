@@ -1,5 +1,5 @@
-import src.ui
-import src.control
+import src.ui.ui as ui
+import src.control as control
 
 class Core:
     """Container for the game object"""
@@ -7,11 +7,12 @@ class Core:
     def __init__(
         self
     ):
-        self.ui = src.ui.GUI()
-        self.controller = src.control.Controller()
+        self.controller = control.Controller()
+        self.ui = ui.GUI(self.controller)
+        
         return
 
     def launch(
         self
     ):
-        self.ui.guiStart()
+        self.ui.mainloop()

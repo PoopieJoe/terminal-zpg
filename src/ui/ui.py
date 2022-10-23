@@ -1,27 +1,71 @@
 import tkinter as tk
+import src.control as control
 
-class GUI:
+class GUI(tk.Tk):
     """Container for the game gui"""
     def __init__(
-        self
+        self,
+        controller:control.Controller
     ):
-        self.root = tk.Tk()
-        self.root.title("Tk Example")
-        self.root.minsize(200, 200)  # width, height
-        self.root.maxsize(1280, 720)  # width, height
-        self.root.geometry("1280x720+50+50")
-        self.root.config(bg="skyblue")
+        tk.Tk.__init__(self)
 
-        top_bar = tk.Frame(self.root,width=1260,height=30)
+        self.controller = controller
+
+        self.title("Tk Example")
+        self.minsize(200, 200)  # width, height
+        self.maxsize(1280, 720)  # width, height
+        self.geometry("1280x720+50+50")
+        self.config(bg="skyblue")
+        self.createWidgets()
+        return
+
+    def createWidgets(self):
+        """Create the widgets for the frame."""             
+        #   Frame Container
+        self.rootcontainer = tk.Frame(self)
+        self.rootcontainer.grid(row=0, column=0, sticky=tk.W+tk.E)
+
+        #   Frames
+        self.frames = {}
+        for f in (FrameHome,FrameMap): # defined subclasses of BaseFrame
+            frame = f(self, self.rootcontainer)
+            frame.grid(row=2, column=2, sticky=tk.NW+tk.SE)
+            frame.config(bg="black")
+            self.frames[f] = frame
+        self.showFrame(FrameHome)
+
+    def showFrame(self, frameclass):
+        self.frames[frameclass].tkraise()
+
+class BaseFrame(tk.Frame):
+    """Container for a (sub)menu"""
+    def __init__(
+        self,
+        frameController:GUI,
+        master
+    ):
+        tk.Frame.__init__(self, master)
+        self.frameController = frameController
+        self.grid()
+        self.createWidgets()
+        
+    def createWidgets(self):
+        """Placeholder that creates the widgets for the frame"""
+        return NotImplementedError
+
+class FrameHome(BaseFrame):
+    """Home screen"""
+    def createWidgets(self):
+        top_bar = tk.Frame(self,width=1260,height=30)
         top_bar.grid(row=0,column=0,padx=5,pady=5)
 
-        quit_button = tk.Button(top_bar,text="Quit", command=self.root.quit)
+        quit_button = tk.Button(top_bar,text="Quit", command=self.quit)
         quit_button.pack(side="right")
 
         title_label = tk.Label(top_bar,text="Title")
         title_label.pack(side="left")
 
-        bottom_panel = tk.Frame(self.root)
+        bottom_panel = tk.Frame(self)
         bottom_panel.grid(row=1,column=0)
 
         main_panel = tk.Frame(bottom_panel,width=900, height=650, bg="grey")
@@ -83,9 +127,12 @@ class GUI:
         # Equipment
         equipment_panel = tk.Frame(abilityequipment_panel, width=120, height=300, bg="yellow")
         equipment_panel.grid(row=0,column=1,padx=10,pady=10)
-        return
 
-    def guiStart(
-        self
-    ):
-        self.root.mainloop()
+class FrameMap(BaseFrame):
+    """Shows worldgen map"""
+    def createWidgets(self):
+        mapCanvas = tk.Canvas(self,width=1280,height=720,bg="white")
+        map = self.frameController.controller.newworld # fetch map
+        print(map)
+
+

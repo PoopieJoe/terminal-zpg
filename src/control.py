@@ -5,9 +5,9 @@ class Controller:
     def __init__(
         self
     ):
-        newchar = char.Character()
-        newchar.generate()
+        self.newchar = char.Character()
+        self.newchar.generate()
         
-        newworld = world.World()
-        newworld.generate()
+        self.newworld = world.World()
+        self.newworld.generateInitial()
         return

@@ -6,7 +6,7 @@ class CONSTANTOBJECT:
         return True
 
     def getlist(self):
-        return self.__dict__.values()
+        return list(self.__dict__.values())
 
 
 # UI constants
@@ -164,6 +164,21 @@ STATMODS = StatModifiers(attrobj=ATTRIBUTES,statsobj=STATS)
 
 
     # World
+class WindDirections(CONSTANTOBJECT):
+    def __init__(self):
+        super().__init__()
+        self.NORTH = "North"
+        self.NORTHEAST = "Northeast"
+        self.EAST = "East"
+        self.SOUTHEAST = "Southeast"
+        self.SOUTH = "South"
+        self.SOUTHWEAST = "Southwest"
+        self.WEST = "West"
+        self.NORTHWEST = "Northwest"
+WINDDIRECTIONS = WindDirections()
+
+CHUNKSIZEW = 5#10
+CHUNKSIZEH = 5#10
 class WorldTileTypes(CONSTANTOBJECT):
     def __init__(self):
         super().__init__()
@@ -171,4 +186,6 @@ class WorldTileTypes(CONSTANTOBJECT):
         self.FOREST = "Forest"
         self.DESERT = "Desert"
         self.OCEAN = "Ocean"
+        self.VOID = "Void"
 WORLDTILETYPES = WorldTileTypes()
+WORLDGENERATORTILES = [WORLDTILETYPES.PLAINS, WORLDTILETYPES.FOREST, WORLDTILETYPES.DESERT, WORLDTILETYPES.OCEAN]
