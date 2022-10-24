@@ -1,3 +1,5 @@
+import math
+
 class CONSTANTOBJECT:
     def contains(self,*args):
         for arg in args:
@@ -177,8 +179,10 @@ class WindDirections(CONSTANTOBJECT):
         self.NORTHWEST = "Northwest"
 WINDDIRECTIONS = WindDirections()
 
-CHUNKSIZEW = 5#10
-CHUNKSIZEH = 5#10
+CELLSIZEW = 5#10
+CELLSIZEH = 5#10
+CELLSIZE = (CELLSIZEW,CELLSIZEH)
+ORIGINOFFSET = (math.floor(CELLSIZEW/2),math.floor(CELLSIZEH/2))
 class WorldTileTypes(CONSTANTOBJECT):
     def __init__(self):
         super().__init__()

@@ -1,24 +1,24 @@
+import math
 import json
 import random
 from src.constants import *
 
-class Cell:
+class Tile:
     def __init__(self,type:str):
         self.type = type
         return
 
-class Chunk:
+class Cell:
     def __init__(
         self,
-        id,
-        data:list[list[Cell]] = None,
+        offsetx:int,
+        offsety:int,
+        data:list[list[Tile]] = None,
         neighbours:list[int] = None,
-        width = CHUNKSIZEW,
-        height = CHUNKSIZEH,
-        offset = None,
-        fill = Cell(WORLDTILETYPES.VOID)
+        width = CELLSIZEW,
+        height = CELLSIZEH,
+        fill = Tile(WORLDTILETYPES.VOID)
     ):
-        self.id = id
         self.isloaded = False
         self.data = data
         if self.data == None:
@@ -27,23 +27,23 @@ class Chunk:
             self.neighbours = [None for _ in range(len(WINDDIRECTIONS.getlist()))]
         else:
             self.neighbours = neighbours    
-        self.width = width
-        self.height = height
-        self.offset = offset
+        self.dimensions = (width,height)
+        self.celloffset = (offsetx,offsety)
+        self.tileoffset = (offsetx*width,offsety*height) + ORIGINOFFSET
         return
 
-    def getCell(
+    def getTile(
         self,
-        x,y
-    ) -> Cell:
-        return self.data[x][y]
+        coord:tuple
+    ) -> Tile:
+        return self.data[coord[0]][coord[1]]
 
-    def setCell(
+    def setTile(
         self,
-        x,y,
-        value:Cell
+        coord:tuple,
+        value:Tile
     ):
-        self.data[x][y] = value
+        self.data[coord[0]][coord[1]] = value
         return
 
     
@@ -53,81 +53,75 @@ class World:
     ):
         self.generator = WorldGenerator()
         print("Generating world...")
-        self.chunks = self.generateInitial()
+        self.cells = self.generateInitialNine()
         return
 
-    def generateInitial(
+    def generateInitialNine(
         self,
-        chunkWidth = CHUNKSIZEW,
-        chunkHeight = CHUNKSIZEH
-    ):
-        # generate base chunk
-        origin = Chunk(0)
+        cellWidth = CELLSIZEW,
+        cellHeight = CELLSIZEH
+    )->list[Cell]:
+        # generate base cell
+        origin = Cell(0,0)
 
         # determine number of biome seeds
         nBiomes = random.randint(1,3)
 
         for _ in range(nBiomes):
-            row = random.randint(0,chunkHeight-1)
-            column = random.randint(0,chunkWidth-1)
-            cell = origin.getCell(row,column)
-            biome = random.choices(WORLDTILETYPES.getlist())
-            cell.type = biome
+            row = random.randint(0,cellHeight-1)
+            column = random.randint(0,cellWidth-1)
+            tile = origin.getTile((row,column))
+            tile.type = random.choices(WORLDTILETYPES.getlist())
             print("Seed placed at (" + str(row) + "," + str(column) + ")")
 
-        chunks = [origin]
-        for n in range(8):
-            newchunk = Chunk(n+1)
-            self.setNeighbours(origin,newchunk,WINDDIRECTIONS.getlist()[n])
-            # Something something Perlin Noise for procedural generation
-            chunks.append(newchunk)
+        cells = []
+        sidelength = 3
+        radius = math.floor(sidelength/2)
+        for r in range(-radius,radius+1):
+            for c in range(-radius,radius+1):
+                if r == 0 and c == 0:
+                    cells.append(origin)
+                else:
+                    cells.append(Cell(r,c))
             
-        return chunks
+        return cells
 
-    # TODO Away with the Neighbor system and just use coordinates, 
-    # but do we keep the list (coord is a member of Chuck) 
-    # or another 2D array of Chunks?
+    # Solution: keep list of cells with coord members, is robust for negative coordinates and dynamic cell generation
 
-    def setNeighbours(
+    def findCell(
         self,
-        srcChunk:Chunk,
-        destChunk:Chunk,
-        direction
+        celloffset:tuple
     ):
-        dir_n = WINDDIRECTIONS.getlist().index(direction)
-        srcChunk.neighbours[dir_n] = destChunk.id
-        oppositedir_n = dir_n-len(WINDDIRECTIONS.__dict__)
-        destChunk.neighbours[oppositedir_n] = srcChunk.id
+        for cell in self.cells:
+            if cell.celloffset == celloffset:
+                return cell
 
-    def findOtherNeighbours(
+
+    def coords2cellOffset(
         self,
-        chunk:Chunk
+        coords:tuple
     ):
-        for dir,chunkid in enumerate(chunk.neighbours):
-            if chunkid != 0:
-                cui = self.chunks[chunkid]
-                origindir = dir-len(WINDDIRECTIONS.getlist())
-                if dir % 2 == 0: #cardinal directions
-                    for offset in [-2,-1,1,2]:
-                        if cui.neighbours[origindir+offset] != None:
+        celloffsetx,tileoffsetx = divmod(coords[0],CELLSIZE[0])
+        celloffsety,tileoffsety = divmod(coords[1],CELLSIZE[1])
+        
+        return (celloffsetx, celloffsety), (tileoffsetx,tileoffsety)
 
-        newNeighbours = list()
-        return newNeighbours
-
-    def getCell(
+    def getTile(
         self,
-        x:int,
-        y:int,
+        coord:tuple
     ):
-        return NotImplementedError
+        cellOffset,tileoffset = self.coords2cellOffset(coord)
+        cell = self.findCell(cellOffset)
+        return cell.getTile(tileoffset)
 
-    def setCell(
+    def setTile(
         self,
-        x:int,
-        y:int,
-        value:Cell
+        coord:tuple,
+        value:Tile
     ):
-        return NotImplementedError
+        cellOffset,tileoffset = self.coords2cellOffset(coord)
+        cell = self.findCell(cellOffset)
+        return cell.setTile(tileoffset,value)
 
 class WorldGenerator:
     def __init__(self):
@@ -135,23 +129,22 @@ class WorldGenerator:
         random.seed(self.seed)
         print("Generator initialized with seed: " + str(self.seed))
 
-    def genChunk(
-        self,
-        neighbours
+    def genCell(
+        self
     ):
         return NotImplementedError
 
-    def getCell(
+    def getTile(
         self,
         row:int,
         column:int,
     ):
         return NotImplementedError
 
-    def setCell(
+    def setTile(
         self,
         row:int,
         column:int,
-        value:Cell
+        value:Tile
     ):
         return NotImplementedError
