@@ -1,6 +1,7 @@
 import tkinter as tk
 import src.control as control
 import src.ui.widgets as widgets
+from src.constants import *
 
 class GUI(tk.Tk):
     """Container for the game gui"""
@@ -28,7 +29,7 @@ class GUI(tk.Tk):
 
         #   Frames
         self.frames = {}
-        for f in (FrameHome,FrameMap): # defined subclasses of BaseFrame
+        for f in (FrameHome,FrameWorld): # defined subclasses of BaseFrame
             frame = f(self, self.rootcontainer)
             frame.grid(row=2, column=2, sticky=tk.NW+tk.SE)
             frame.config(bg="black")
@@ -129,11 +130,11 @@ class FrameHome(BaseFrame):
         equipment_panel = tk.Frame(abilityequipment_panel, width=120, height=300, bg="yellow")
         equipment_panel.grid(row=0,column=1,padx=10,pady=10)
 
-class FrameMap(BaseFrame):
+class FrameWorld(BaseFrame):
     """Shows worldgen map"""
     def createWidgets(self):
-        mapCanvas = tk.Canvas(self,width=1280,height=720,bg="white")
-        map = self.frameController.controller.newworld # fetch map
+        world = self.frameController.controller.newworld
+        map = widgets.MapRenderer(self,world,(0,0))
         print(map)
 
 
