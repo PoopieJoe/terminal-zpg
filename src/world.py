@@ -15,21 +15,21 @@ class Cell:
         offsety:int,
         data:list[list[Tile]] = None,
         neighbours:list[int] = None,
-        width = CELLSIZEW,
-        height = CELLSIZEH,
         fill = Tile(WORLDTILETYPES.VOID)
     ):
         self.isloaded = False
         self.data = data
         if self.data == None:
-            self.data = [[fill for _ in range(width)] for _ in range(height)]
+            self.data = [[fill for _ in range(CELLSIZEW)] for _ in range(CELLSIZEH)]
         if neighbours == None:
             self.neighbours = [None for _ in range(len(WINDDIRECTIONS.getlist()))]
         else:
             self.neighbours = neighbours    
-        self.dimensions = (width,height)
-        self.celloffset = (offsetx,offsety)
-        self.tileoffset = (offsetx*width,offsety*height) + ORIGINOFFSET
+        self.celloffset = (offsetx,offsety)                             # offset in cells
+        self.bottomleft = (offsetx*CELLSIZEW,offsety*CELLSIZEH)         # coordinate of the bottomleft tile
+        self.topleft = (self.bottomleft[0],self.bottomleft[1]+CELLSIZEH-1)#etc
+        self.topright = (self.bottomleft[0]+CELLSIZEW-1,self.bottomleft[1]+CELLSIZEH-1)
+        self.bottomright = (self.bottomleft[0]+CELLSIZEW-1,self.bottomleft[1])
         return
 
     def getTile(
@@ -95,6 +95,8 @@ class World:
         for cell in self.cells:
             if cell.celloffset == celloffset:
                 return cell
+        return ValueError
+
 
 
     def coords2cellOffset(

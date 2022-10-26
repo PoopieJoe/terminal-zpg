@@ -8,36 +8,41 @@ class MapRenderer(tk.Frame):
     def __init__(
         self,
         master,
-        world:world.World,
+        map:world.World,
         coords:tuple
     ):
-        from world import World,Cell,Tile
-        tk.Frame(master)
+        
+        tk.Frame.__init__(self,master)
 
+        # empty canvas
+        tilesize = 10         # size of a tile in px
         renderareasize = 3    # render area size in chunks (3x3)
+        mapCanvas = tk.Canvas(self,width=tilesize*renderareasize,height=tilesize*renderareasize,bg="white")
 
         # load relevant chunks (3x3 centered around character)
         radius = math.floor(renderareasize/2)
-        charchunk,tileoffset = world.coords2cellOffset(coords)   # chunk of character
-        renderedchunks = []
-        for xoffset in range(charchunk[0]-radius,charchunk[0]+radius+1):
-            rowarr = []
-            for yoffset in range(charchunk[1]-radius,charchunk[1]+radius+1):
-                rowarr.append(world.findCell((xoffset,yoffset)))
-            renderedchunks.append(rowarr)
+        charchunk,tileoffset = map.coords2cellOffset(coords)   # chunk of character
 
+        renderarea = [[world.Tile(WORLDTILETYPES.VOID) for _ in range(renderareasize*CELLSIZEW)] for _ in range(renderareasize*CELLSIZEH)]
 
-        renderarea = []
-        for xoffset in range(renderareasize*CELLSIZEW):
-            rowarr = []
-            for yoffset in range(renderareasize*CELLSIZEH):
-                rowarr.append(Tile(WORLDTILETYPES.VOID))
-            renderarea.append(rowarr)
+        topleftcoord = map.findCell((coords[0]-radius,coords[1]+radius)).topleft #this coordinate is mapped to 0,0 on the canvas
+
+        for celloffsetx in range(charchunk[0]-radius,charchunk[0]+radius):
+            for celloffsety in range(charchunk[1]-radius,charchunk[1]+radius):
+                cell = map.findCell((celloffsetx,celloffsety))
+
+                for xoffset in range(CELLSIZEW):
+                    for yoffset in range(CELLSIZEH):
+                        tile = cell.getTile((xoffset,yoffset))
+                        
+                        rendercellcoord = (cell.topleft[0]-topleftcoord[0]+xoffset,cell.topleft[1]-topleftcoord[1]+yoffset)
+                        renderarea[rendercellcoord[0]][rendercellcoord[1]] = tile
+        print(renderarea)
+
 
         
         
 
-        # empty canvas
-        tilesize = 10                   # size of a tile in px
-        mapCanvas = tk.Canvas(self,width=tilesize*renderareasize,height=tilesize*renderareasize,bg="white")
+
+        
 
