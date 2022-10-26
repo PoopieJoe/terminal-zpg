@@ -1,5 +1,6 @@
 import math
 import tkinter as tk
+from turtle import bgcolor
 import src.control as control
 import src.world as world
 from src.constants import *
@@ -15,9 +16,10 @@ class MapRenderer(tk.Frame):
         tk.Frame.__init__(self,master)
 
         # empty canvas
-        tilesize = 10         # size of a tile in px
+        tilesize = 100         # size of a tile in px
         renderareasize = 3    # render area size in chunks (3x3)
         mapCanvas = tk.Canvas(self,width=tilesize*renderareasize,height=tilesize*renderareasize,bg="white")
+        mapCanvas.pack()
 
         # load relevant chunks (3x3 centered around character)
         radius = math.floor(renderareasize/2)
@@ -34,11 +36,27 @@ class MapRenderer(tk.Frame):
                 for xoffset in range(CELLSIZEW):
                     for yoffset in range(CELLSIZEH):
                         tile = cell.getTile((xoffset,yoffset))
-                        
-                        rendercellcoord = (cell.topleft[0]-topleftcoord[0]+xoffset,cell.topleft[1]-topleftcoord[1]+yoffset)
-                        renderarea[rendercellcoord[0]][rendercellcoord[1]] = tile
-        print(renderarea)
+                        rendertilecoord = (topleftcoord[0]-cell.topleft[0]+xoffset,topleftcoord[1]-cell.topleft[1]+yoffset)
+                        canvascoord = (rendertilecoord[0]*tilesize,rendertilecoord[1]*tilesize)
+                        match tile.type[0]:
+                            case WORLDTILETYPES.VOID:
+                                color = "black"#"#000000"
+                            case WORLDTILETYPES.FOREST:
+                                color = "green"#"#00FF00"
+                            case WORLDTILETYPES.DESERT:
+                                color = "yellow"
+                            case WORLDTILETYPES.OCEAN:
+                                color = "blue"
+                            case WORLDTILETYPES.PLAINS:
+                                color = "#88FF00"
+                        mapCanvas.create_rectangle( [canvascoord[0],
+                                                    canvascoord[1],
+                                                    canvascoord[0] + tilesize,
+                                                    canvascoord[1] + tilesize],
+                                                    fill=color)
+                        renderarea[rendertilecoord[0]][rendertilecoord[1]] = tile
 
+        return
 
         
         

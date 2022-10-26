@@ -34,7 +34,7 @@ class GUI(tk.Tk):
             frame.grid(row=2, column=2, sticky=tk.NW+tk.SE)
             frame.config(bg="black")
             self.frames[f] = frame
-        self.showFrame(FrameHome)
+        self.showFrame(FrameWorld)
 
     def showFrame(self, frameclass):
         self.frames[frameclass].tkraise()
@@ -135,6 +135,8 @@ class FrameWorld(BaseFrame):
     def createWidgets(self):
         world = self.frameController.controller.newworld
         map = widgets.MapRenderer(self,world,(0,0))
-        print(map)
+        map.grid(row=0,column=0,padx=5,pady=5)
+        print(self)
+        return
 
 
