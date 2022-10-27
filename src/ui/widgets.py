@@ -16,7 +16,7 @@ class MapRenderer(tk.Frame):
         tk.Frame.__init__(self,master)
 
         # empty canvas
-        tilesize = 100         # size of a tile in px
+        tilesize = 10         # size of a tile in px
         renderareasize = 3    # render area size in chunks (3x3)
         mapCanvas = tk.Canvas(self,width=tilesize*renderareasize,height=tilesize*renderareasize,bg="white")
         mapCanvas.pack()
@@ -29,16 +29,16 @@ class MapRenderer(tk.Frame):
 
         topleftcoord = map.findCell((coords[0]-radius,coords[1]+radius)).topleft #this coordinate is mapped to 0,0 on the canvas
 
-        for celloffsetx in range(charchunk[0]-radius,charchunk[0]+radius):
-            for celloffsety in range(charchunk[1]-radius,charchunk[1]+radius):
+        for celloffsetx in range(charchunk[0]-radius,charchunk[0]+radius+1):
+            for celloffsety in range(charchunk[1]-radius,charchunk[1]+radius+1):
                 cell = map.findCell((celloffsetx,celloffsety))
 
                 for xoffset in range(CELLSIZEW):
                     for yoffset in range(CELLSIZEH):
                         tile = cell.getTile((xoffset,yoffset))
-                        rendertilecoord = (topleftcoord[0]-cell.topleft[0]+xoffset,topleftcoord[1]-cell.topleft[1]+yoffset)
+                        rendertilecoord = (cell.topleft[0]-topleftcoord[0]+xoffset,topleftcoord[1]-cell.topleft[1]+yoffset)
                         canvascoord = (rendertilecoord[0]*tilesize,rendertilecoord[1]*tilesize)
-                        match tile.type[0]:
+                        match tile.type:
                             case WORLDTILETYPES.VOID:
                                 color = "black"#"#000000"
                             case WORLDTILETYPES.FOREST:
@@ -49,6 +49,8 @@ class MapRenderer(tk.Frame):
                                 color = "blue"
                             case WORLDTILETYPES.PLAINS:
                                 color = "#88FF00"
+                            case other:
+                                color = "black"#"#000000"
                         mapCanvas.create_rectangle( [canvascoord[0],
                                                     canvascoord[1],
                                                     canvascoord[0] + tilesize,
