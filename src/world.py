@@ -14,13 +14,12 @@ class Cell:
         offsetx:int,
         offsety:int,
         data:list[list[Tile]] = None,
-        neighbours:list[int] = None,
-        fill = Tile(WORLDTILETYPES.VOID)
+        neighbours:list[int] = None
     ):
         self.isloaded = False
         self.data = data
         if self.data == None:
-            self.data = [[fill for _ in range(CELLSIZEW)] for _ in range(CELLSIZEH)]
+            self.data = [[Tile(WORLDTILETYPES.VOID) for _ in range(CELLSIZEW)] for _ in range(CELLSIZEH)]
         if neighbours == None:
             self.neighbours = [None for _ in range(len(WINDDIRECTIONS.getlist()))]
         else:
@@ -71,7 +70,7 @@ class World:
             row = random.randint(0,cellHeight-1)
             column = random.randint(0,cellWidth-1)
             tile = origin.getTile((row,column))
-            tile.type = random.choices(WORLDTILETYPES.getlist())
+            tile.type = random.choices(WORLDTILETYPES.getlist())[0]
             print("Seed placed at (" + str(row) + "," + str(column) + ")")
 
         cells = []
