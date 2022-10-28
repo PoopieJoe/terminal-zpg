@@ -21,7 +21,7 @@ class WorldGenerator:
         # determine number of biome seeds
         nBiomeSeeds = random.randint(10,20)
         
-        for _ in range(nBiomeSeeds):
+        for _ in range(nBiomeSeeds): # repeat for every seed
             row = random.randint(0,CELLSIZEH-1)
             column = random.randint(0,CELLSIZEW-1)
             seed = c.getTile((column,row))
@@ -31,8 +31,8 @@ class WorldGenerator:
             # let the seed spread into a blob
             minspread = 0.8
             spreadchance = minspread + (1-minspread)*random.random() #random value between minspread and 1
-            decayrate = 0.02
-            diagonalmodifier = 2 ** -0.5
+            decayrate = 0.02    # rate at which spread chance decays
+            diagonalmodifier = 2 ** -0.5    #diagonals are scaled to distance, makes blobs less square
             spreadrange = 1 #numbers > 1 make it slower and the biomes more
             blob = [{
                 "coord":(column,row),
@@ -49,7 +49,7 @@ class WorldGenerator:
                                 and coord[0] < CELLSIZEW
                                 and coord[1] < CELLSIZEH):
                                 sel_tile = c.getTile(coord)
-                                if (tileoffsetx,tileoffsety) in ((1,1),(1,-1),(-1,1),(-1,-1)):
+                                if (tileoffsetx,tileoffsety) in ((1,1),(1,-1),(-1,1),(-1,-1)): # scale diagonal spread chance down
                                     spreadmod = diagonalmodifier
                                 else:
                                     spreadmod = 1
@@ -70,7 +70,7 @@ class WorldGenerator:
             for row in range(CELLSIZEH):
                 for col in range(CELLSIZEH):
                     tile = c.getTile((col,row))
-                    sur_tiles = []
+                    sur_tiles = [] #surrounding tiles
                     for tileoffsetx in range(-1,1+1):
                         for tileoffsety in range(-1,1+1):
                             coord = (col+tileoffsetx,row+tileoffsety)# fetch surrounding tiles
@@ -83,13 +83,10 @@ class WorldGenerator:
                     counts = Counter(sur_tiles)
                     newtype = counts.most_common(1)[0][0] # set to its majority
                     if newtype != tile.type:
-                        newdata[col][row] = cell.Tile(newtype)
+                        newdata[col][row] = cell.Tile(newtype) #orphans are assimilated
                     else:
                         newdata[col][row] = tile
             c.data = newdata
-
-
-
         return c
 
     def getTile(
