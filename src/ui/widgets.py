@@ -1,6 +1,7 @@
 import math
 import tkinter as tk
 import src.control as control
+import src.cell as cell
 import src.world as world
 from src.constants import *
 
@@ -25,18 +26,18 @@ class MapRenderer(tk.Frame):
         radius = math.floor(renderareasize/2)
         charchunk,tileoffset = map.coords2cellOffset(coords)   # chunk of character
 
-        renderarea = [[world.Tile(WORLDTILETYPES.VOID) for _ in range(renderareasize*CELLSIZEW)] for _ in range(renderareasize*CELLSIZEH)]
+        renderarea = [[cell.Tile(WORLDTILETYPES.VOID) for _ in range(renderareasize*CELLSIZEW)] for _ in range(renderareasize*CELLSIZEH)]
 
         topleftcoord = map.findCell((coords[0]-radius,coords[1]+radius)).topleft #this coordinate is mapped to 0,0 on the canvas
 
         for celloffsetx in range(charchunk[0]-radius,charchunk[0]+radius+1):
             for celloffsety in range(charchunk[1]-radius,charchunk[1]+radius+1):
-                cell = map.findCell((celloffsetx,celloffsety))
+                currentCell = map.findCell((celloffsetx,celloffsety))
 
                 for xoffset in range(CELLSIZEW):
                     for yoffset in range(CELLSIZEH):
-                        tile = cell.getTile((xoffset,yoffset))
-                        rendertilecoord = (cell.topleft[0]-topleftcoord[0]+xoffset,topleftcoord[1]-cell.topleft[1]+yoffset)
+                        tile = currentCell.getTile((xoffset,yoffset))
+                        rendertilecoord = (currentCell.topleft[0]-topleftcoord[0]+xoffset,topleftcoord[1]-currentCell.topleft[1]+yoffset)
                         canvascoord = (rendertilecoord[0]*tilesize,rendertilecoord[1]*tilesize)
                         match tile.type:
                             case WORLDTILETYPES.VOID:
@@ -56,7 +57,7 @@ class MapRenderer(tk.Frame):
                                                     canvascoord[0] + tilesize,
                                                     canvascoord[1] + tilesize],
                                                     fill=color)
-                        mapCanvas.create_text(canvascoord[0]+tilesize/2,canvascoord[1]+tilesize/2,text="("+str(xoffset)+"," +str(yoffset)+ ")" )
+                        #mapCanvas.create_text(canvascoord[0]+tilesize/2,canvascoord[1]+tilesize/2,text="("+str(xoffset)+"," +str(yoffset)+ ")" )
 
 
         return
