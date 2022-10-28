@@ -13,7 +13,7 @@ class GUI(tk.Tk):
 
         self.controller = controller
 
-        self.title("Tk Example")
+        self.title("ZPG-RPG")
         self.minsize(200, 200)  # width, height
         self.maxsize(1280, 720)  # width, height
         self.geometry("1280x720+50+50")
