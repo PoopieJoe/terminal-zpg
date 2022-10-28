@@ -1,20 +1,19 @@
 import random
 from collections import Counter
-import copy
+import time
 import src.cell as cell
 from src.constants import *
 
 class WorldGenerator:
-    def __init__(self):
-        self.seed = random.randint(0,pow(2,64)-1) #initialize randomizer
-        random.seed(self.seed)
-        print("Generator initialized with seed: " + str(self.seed))
+    def __init__(self,seed):
+        random.seed(seed)
 
     def genCell(
         self,
         offsetx,
         offsety
     ):
+        
         #hollow cell
         c = cell.Cell(offsetx,offsety,random.choices(WORLDGENERATORTILES)[0])
 
@@ -67,6 +66,7 @@ class WorldGenerator:
         CAiterations = 3
         for _ in range(CAiterations):
             newdata = [[None for _ in range(CELLSIZEW)] for _ in range(CELLSIZEH)]
+            
             for row in range(CELLSIZEH):
                 for col in range(CELLSIZEH):
                     tile = c.getTile((col,row))

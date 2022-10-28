@@ -8,8 +8,10 @@ class World:
     def __init__(
         self
     ):
-        self.generator = worldgen.WorldGenerator()
+        seed = "seed"
+        self.generator = worldgen.WorldGenerator(seed)
         print("Generating world...")
+        print("Seed: " + str(seed))
         self.cells = self.generateInitialNine()
         return
 

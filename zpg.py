@@ -1,4 +1,7 @@
+from distutils.debug import DEBUG
 import src.core as core
+
+DEBUGMODE = False
 
 def main():
     game = core.Core()
@@ -6,7 +9,9 @@ def main():
     exit()
 
 
-
-
 if __name__ == "__main__":
-    main()
+    if DEBUGMODE:
+        import cProfile
+        cProfile.run('main()','zpg.prof')
+    else:
+        main()
