@@ -45,6 +45,7 @@ class MapRenderer(tk.Frame):
                                                     canvascoord[1],
                                                     canvascoord[0] + tilesize,
                                                     canvascoord[1] + tilesize],
+                                                    width=0,
                                                     fill=color)
                         #mapCanvas.create_text(canvascoord[0]+tilesize/2,canvascoord[1]+tilesize/2,text="("+str(xoffset)+"," +str(yoffset)+ ")" )
 
@@ -58,7 +59,7 @@ BIOMECOLORMAP = {
     WORLDTILETYPES.FOREST: "green",
     WORLDTILETYPES.OCEAN: "blue",
     WORLDTILETYPES.PLAINS: "#88FF00",
-    WORLDTILETYPES.TUNDRA: "#BBBBBB",
+    WORLDTILETYPES.TUNDRA: "#DDDDEE",
     WORLDTILETYPES.MOUNTAIN: "#F4A460",
 }
 

@@ -1,26 +1,24 @@
+import copy
+from src.constants import *
+
+
 class Tile:
     def __init__(self,type:str):
         self.type = type
         return
-
-from src.constants import *
 
 class Cell:
     def __init__(
         self,
         offsetx:int,
         offsety:int,
-        data:list[list[Tile]] = None,
-        neighbours:list[int] = None
+        fill:str = None
     ):
         self.isloaded = False
-        self.data = data
-        if self.data == None:
+        if fill == None:
             self.data = [[Tile(WORLDTILETYPES.VOID) for _ in range(CELLSIZEW)] for _ in range(CELLSIZEH)]
-        if neighbours == None:
-            self.neighbours = [None for _ in range(len(WINDDIRECTIONS.getlist()))]
         else:
-            self.neighbours = neighbours    
+            self.data = [[Tile(fill) for _ in range(CELLSIZEW)] for _ in range(CELLSIZEH)]
         self.celloffset = (offsetx,offsety)                             # offset in cells
         self.bottomleft = (offsetx*CELLSIZEW,offsety*CELLSIZEH)         # coordinate of the bottomleft tile
         self.topleft = (self.bottomleft[0],self.bottomleft[1]+CELLSIZEH-1)#etc
