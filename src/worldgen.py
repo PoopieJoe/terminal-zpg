@@ -64,7 +64,7 @@ class WorldGenerator:
                 spreadchance = spreadchance - decayrate
 
         # run cellular automata logic
-        CAiterations = 2
+        CAiterations = 3
         for _ in range(CAiterations):
             newdata = [[None for _ in range(CELLSIZEW)] for _ in range(CELLSIZEH)]
             for row in range(CELLSIZEH):
