@@ -39,19 +39,8 @@ class MapRenderer(tk.Frame):
                         tile = currentCell.getTile((xoffset,yoffset))
                         rendertilecoord = (currentCell.topleft[0]-topleftcoord[0]+xoffset,topleftcoord[1]-currentCell.topleft[1]+yoffset)
                         canvascoord = (rendertilecoord[0]*tilesize,rendertilecoord[1]*tilesize)
-                        match tile.type:
-                            case WORLDTILETYPES.VOID:
-                                color = "black"#"#000000"
-                            case WORLDTILETYPES.FOREST:
-                                color = "green"#"#00FF00"
-                            case WORLDTILETYPES.DESERT:
-                                color = "yellow"
-                            case WORLDTILETYPES.OCEAN:
-                                color = "blue"
-                            case WORLDTILETYPES.PLAINS:
-                                color = "#88FF00"
-                            case other:
-                                color = "black"#"#000000"
+                        color = BIOMECOLORMAP[tile.type]
+
                         mapCanvas.create_rectangle( [canvascoord[0],
                                                     canvascoord[1],
                                                     canvascoord[0] + tilesize,
@@ -63,7 +52,15 @@ class MapRenderer(tk.Frame):
         return
 
         
-        
+BIOMECOLORMAP = {
+    WORLDTILETYPES.DESERT: "yellow",
+    WORLDTILETYPES.VOID: "black",
+    WORLDTILETYPES.FOREST: "green",
+    WORLDTILETYPES.OCEAN: "blue",
+    WORLDTILETYPES.PLAINS: "#88FF00",
+    WORLDTILETYPES.TUNDRA: "#BBBBBB",
+    WORLDTILETYPES.MOUNTAIN: "#F4A460",
+}
 
 
         

@@ -28,7 +28,8 @@ class WorldGenerator:
 
             # let the seed spread into a blob
             spreadchance = 1
-            decayrate = 0.1
+            decayrate = 0.05
+            spreadrange = 1 #numbers > 1 make it slower and the biomes more squarish
             blob = [{
                 "coord":(row,column),
                 "tile":seed
@@ -38,8 +39,8 @@ class WorldGenerator:
             while spreadchance > 0:
                 newblob = []
                 for tile in blob:
-                    for tileoffsetx in range(-2,1+1):
-                        for tileoffsety in range(-2,2+1):
+                    for tileoffsetx in range(-spreadrange,spreadrange+1):
+                        for tileoffsety in range(-spreadrange,spreadrange+1):
                             coord = (tile["coord"][0]+tileoffsetx,tile["coord"][1]+tileoffsety)
                             if( (tileoffsetx,tileoffsety) != (0,0)
                                 and coord[0] < CELLSIZEW

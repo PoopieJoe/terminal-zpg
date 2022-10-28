@@ -186,10 +186,18 @@ ORIGINOFFSET = (math.floor(CELLSIZEW/2),math.floor(CELLSIZEH/2))
 class WorldTileTypes(CONSTANTOBJECT):
     def __init__(self):
         super().__init__()
+        self.VOID = "Void"
         self.PLAINS = "Plains"
         self.FOREST = "Forest"
         self.DESERT = "Desert"
         self.OCEAN = "Ocean"
-        self.VOID = "Void"
+        self.MOUNTAIN = "Mountain"
+        self.TUNDRA = "Tundra"
+        self.MOUNTAINPEAK = "Mountain_peak"
+
 WORLDTILETYPES = WorldTileTypes()
-WORLDGENERATORTILES = [WORLDTILETYPES.PLAINS, WORLDTILETYPES.FOREST, WORLDTILETYPES.DESERT, WORLDTILETYPES.OCEAN]
+WORLDGENTILESBLACKLIST = [
+    WORLDTILETYPES.VOID,
+    WORLDTILETYPES.MOUNTAINPEAK
+]
+WORLDGENERATORTILES = [tt for tt in WORLDTILETYPES.getlist() if tt not in WORLDGENTILESBLACKLIST]
