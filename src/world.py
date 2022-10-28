@@ -64,14 +64,15 @@ class World:
         origin = Cell(0,0)
 
         # determine number of biome seeds
-        nBiomes = random.randint(1,3)
+        nBiomeSeeds = random.randint(2,4)
+        print("number of biome seeds: " + str(nBiomeSeeds))
 
-        for _ in range(nBiomes):
+        for _ in range(nBiomeSeeds):
             row = random.randint(0,cellHeight-1)
             column = random.randint(0,cellWidth-1)
             tile = origin.getTile((row,column))
-            tile.type = random.choices(WORLDTILETYPES.getlist())[0]
-            print("Seed placed at (" + str(row) + "," + str(column) + ")")
+            tile.type = random.choices(WORLDGENERATORTILES)[0]
+            print("Seed placed at (" + str(row) + "," + str(column) + ") of type: " + tile.type)
 
         cells = []
         sidelength = 3

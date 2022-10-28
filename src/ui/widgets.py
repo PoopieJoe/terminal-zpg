@@ -1,6 +1,5 @@
 import math
 import tkinter as tk
-from turtle import bgcolor
 import src.control as control
 import src.world as world
 from src.constants import *
@@ -16,9 +15,10 @@ class MapRenderer(tk.Frame):
         tk.Frame.__init__(self,master)
 
         # empty canvas
-        tilesize = 10         # size of a tile in px
-        renderareasize = 3    # render area size in chunks (3x3)
-        mapCanvas = tk.Canvas(self,width=tilesize*renderareasize,height=tilesize*renderareasize,bg="white")
+        canvassize = 700        # size of map canvas in px (NxN)
+        renderareasize = 3      # render area size in chunks (3x3)
+        tilesize = math.floor(canvassize/(renderareasize*CELLSIZEH))  # size of a tile in px
+        mapCanvas = tk.Canvas(self,width=CELLSIZEW*tilesize*renderareasize,height=CELLSIZEH*tilesize*renderareasize,bg="white")
         mapCanvas.pack()
 
         # load relevant chunks (3x3 centered around character)
@@ -56,7 +56,8 @@ class MapRenderer(tk.Frame):
                                                     canvascoord[0] + tilesize,
                                                     canvascoord[1] + tilesize],
                                                     fill=color)
-                        renderarea[rendertilecoord[0]][rendertilecoord[1]] = tile
+                        mapCanvas.create_text(canvascoord[0]+tilesize/2,canvascoord[1]+tilesize/2,text="("+str(xoffset)+"," +str(yoffset)+ ")" )
+
 
         return
 

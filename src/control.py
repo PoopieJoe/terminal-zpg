@@ -9,5 +9,4 @@ class Controller:
         self.newchar.generate()
         
         self.newworld = world.World()
-        self.newworld.generateInitialNine()
         return
