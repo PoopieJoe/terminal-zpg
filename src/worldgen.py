@@ -15,7 +15,9 @@ class WorldGenerator:
     ):
         # For future overhaul
         # Inspiration: https://www.alanzucconi.com/2022/06/05/minecraft-world-generation/
-        # Interesting resources: Fractal noise, Fractal Brownian motion noise, Perlin Noise, Simplex Noise
+        # Interesting resources: 
+        # Noise: Fractal noise, Fractal Brownian motion noise, Perlin Noise, Simplex Noise
+        # Terrain generation: Voronoi diagrams, Diamond Square
         # Basic idea:
         # First binary map (sea vs land) (scale 1x1:64x64)
         # Cellular automata to refine map
