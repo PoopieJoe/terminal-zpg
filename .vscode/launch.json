@@ -8,7 +8,7 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "zpg.py",
+            "program": "zpg.py", //current file: ${file}
             "console": "integratedTerminal",
             "justMyCode": true
         }

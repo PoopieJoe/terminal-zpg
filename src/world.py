@@ -8,10 +8,9 @@ class World:
     def __init__(
         self
     ):
-        seed = "seed"
+        seed = input("Give world seed: ")
         self.generator = worldgen.WorldGenerator(seed)
         print("Generating world...")
-        print("Seed: " + str(seed))
         self.cells = self.generateInitialNine()
         return
 
@@ -30,7 +29,7 @@ class World:
                 if r == 0 and c == 0:
                     cells.append(origin)
                 else:
-                    print("Cell : " + str((r,c)))
+                    print("Cell: " + str((r,c)))
                     cells.append(self.generator.genCell(r,c))
             
         return cells
@@ -52,8 +51,8 @@ class World:
         self,
         coords:tuple
     ):
-        celloffsetx,tileoffsetx = divmod(coords[0],CELLSIZE[0])
-        celloffsety,tileoffsety = divmod(coords[1],CELLSIZE[1])
+        celloffsetx,tileoffsetx = divmod(coords[0],CELLSIZEW)
+        celloffsety,tileoffsety = divmod(coords[1],CELLSIZEH)
         
         return (celloffsetx, celloffsety), (tileoffsetx,tileoffsety)
 

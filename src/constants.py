@@ -13,8 +13,8 @@ class CONSTANTOBJECT:
 
 # UI constants
     # Window
-SCREENW = 1280
-SCREENH = 720
+SCREENW = 1600
+SCREENH = 900
 
 
 # Gameplay
@@ -179,8 +179,8 @@ class WindDirections(CONSTANTOBJECT):
         self.NORTHWEST = "Northwest"
 WINDDIRECTIONS = WindDirections()
 
-CELLSIZEW = 100
-CELLSIZEH = 100
+CELLSIZEW = 128
+CELLSIZEH = 128
 CELLSIZE = (CELLSIZEW,CELLSIZEH)
 ORIGINOFFSET = (math.floor(CELLSIZEW/2),math.floor(CELLSIZEH/2))
 class WorldTileTypes(CONSTANTOBJECT):

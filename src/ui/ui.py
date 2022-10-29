@@ -14,24 +14,24 @@ class GUI(tk.Tk):
         self.controller = controller
 
         self.title("ZPG-RPG")
-        self.minsize(200, 200)  # width, height
-        self.maxsize(1280, 720)  # width, height
-        self.geometry("1280x720+50+50")
-        self.config(bg="skyblue")
-        self.createWidgets()
+        self.minsize(480, 360)  # width, height
+        self.maxsize(SCREENW, SCREENH)  # width, height
+        # self.geometry(str(SCREENW) +"x" + str(SCREENH))
+        self.config(bg="magenta")
+        self.createFrames()
         return
 
-    def createWidgets(self):
-        """Create the widgets for the frame."""             
+    def createFrames(self):
+        """Create the frames for the ui."""             
         #   Frame Container
-        self.rootcontainer = tk.Frame(self)
+        self.rootcontainer = tk.Frame(self,width=SCREENW,height=SCREENH)
         self.rootcontainer.grid(row=0, column=0, sticky=tk.W+tk.E)
 
         #   Frames
         self.frames = {}
         for f in (FrameHome,FrameWorld): # defined subclasses of BaseFrame
             frame = f(self, self.rootcontainer)
-            frame.grid(row=2, column=2, sticky=tk.NW+tk.SE)
+            frame.grid(row=0, column=0, sticky=tk.NW+tk.SE)
             frame.config(bg="black")
             self.frames[f] = frame
         self.showFrame(FrameWorld)
@@ -46,7 +46,7 @@ class BaseFrame(tk.Frame):
         frameController:GUI,
         master
     ):
-        tk.Frame.__init__(self, master)
+        tk.Frame.__init__(self, master,width=SCREENW,height=SCREENH)
         self.frameController = frameController
         self.grid()
         self.createWidgets()
@@ -58,7 +58,7 @@ class BaseFrame(tk.Frame):
 class FrameHome(BaseFrame):
     """Home screen"""
     def createWidgets(self):
-        top_bar = tk.Frame(self,width=1260,height=30)
+        top_bar = tk.Frame(self,width=SCREENW-20,height=SCREENH-20)
         top_bar.grid(row=0,column=0,padx=5,pady=5)
 
         quit_button = tk.Button(top_bar,text="Quit", command=self.quit)
@@ -133,7 +133,7 @@ class FrameHome(BaseFrame):
 class FrameWorld(BaseFrame):
     """Shows worldgen map"""
     def createWidgets(self):
-        world = self.frameController.controller.newworld
+        world = self.frameController.controller.world
         map = widgets.MapRenderer(self,world,(0,0))
         map.pack(fill="both", expand=True)
         return
