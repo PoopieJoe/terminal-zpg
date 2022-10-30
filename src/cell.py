@@ -12,14 +12,17 @@ class Cell:
         self,
         offsetx:int,
         offsety:int,
-        fill:str = None
+        landmap = None
     ):
         self.isloaded = False
-        if fill == None:
-            self.data = [[Tile(WORLDTILETYPES.VOID) for _ in range(CELLSIZEW)] for _ in range(CELLSIZEH)]
-        else:
-            self.data = [[Tile(fill) for _ in range(CELLSIZEW)] for _ in range(CELLSIZEH)]
+        # if fill == None:
+        #     self.data = [[Tile(WORLDTILETYPES.VOID) for _ in range(CELLSIZEW)] for _ in range(CELLSIZEH)]
+        # else:
+        #     self.data = [[Tile(fill) for _ in range(CELLSIZEW)] for _ in range(CELLSIZEH)]
+        self.landmap = landmap
+
         self.celloffset = (offsetx,offsety)                             # offset in cells
+
         self.bottomleft = (offsetx*CELLSIZEW,offsety*CELLSIZEH)         # coordinate of the bottomleft tile
         self.topleft = (self.bottomleft[0],self.bottomleft[1]+CELLSIZEH-1)#etc
         self.topright = (self.bottomleft[0]+CELLSIZEW-1,self.bottomleft[1]+CELLSIZEH-1)

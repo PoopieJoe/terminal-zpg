@@ -14,6 +14,7 @@ class WorldGenerator:
 
     def genCell(
         self,
+        world,
         offsetx,
         offsety
     ):
@@ -30,33 +31,65 @@ class WorldGenerator:
         # Create biome borders
         # Map biomes to climate maps
         # Create height map to determine rivers
+
+        # Find neighbouring cells
+        # East,West,North,South
+        edges = []
+        fakeneighbour = self._genLandmap() # generate raw
+        for dx,dy in ((1,0),(-1,0),(0,1),(0,-1)):
+            try:
+                neighbourland = self._findCell(world,(offsetx+dx,offsety+dy)).landmap
+            except ValueError: # cell does not exist
+                neighbourland = fakeneighbour
+
+            # fetch opposite side
+            match (dx,dy):
+                case (1,0): #East
+                    edge = neighbourland[0][:]
+                case (-1,0): #West
+                    edge = neighbourland[CELLSIZEW//4-1][:]
+                case (0,1): #North
+                    edge = neighbourland[:][CELLSIZEH//4-1]
+                case (0,-1): #South
+                    edge = neighbourland[:][0]
+
+            edges.append(edge)
+
+        # create interpolated landmap
+        # interpolate columns
+        for column in range(CELLSIZEW):
+            pass
         
         # Land map
         # Scale = 1:32
         # Land:Ocean odds = 25/100
         landmap = self._genLandmap()
-        printmap(landmap,"Land map 1:2")
+        # printmap(landmap,"Land map 1:2")
 
-        randnoise = noise.generateFractalNoise2d(landmap.shape,(8,8))
-        printmap(randnoise,"noise")
 
-        plt.show()
-        return cell
 
-    def getTile(
+        # randnoise = noise.generateFractalNoise2d(landmap.shape,(8,8))
+        # printmap(randnoise,"noise")
+
+        # plt.show()
+
+        # Fill cell
+        c = cell.Cell(offsetx,offsety,landmap.tolist())
+        return c
+
+    def _genEdge(
         self,
-        row:int,
-        column:int,
+        sz = CELLSIZEH,
+        clip = None
     ):
-        return NotImplementedError
+        edge = noise.generateFractalNoise2d((1,sz),(1,16))
+        edge = (edge - np.min(edge))/np.max(edge) # normalize between 0 and 1
+        edge = np.rint(edge)
 
-    def setTile(
-        self,
-        row:int,
-        column:int,
-        value:cell.Tile
-    ):
-        return NotImplementedError
+        # clip if limits are given
+        if clip != None:
+                edge = np.clip(edge,clip[0],clip[1])
+        return edge
 
     def _genLandmap(
         self
@@ -120,6 +153,16 @@ class WorldGenerator:
                 if random.random() < likelyhood:
                     arr[c][r] = 1
         return arr
+
+    def _findCell(
+        self,
+        cells:list[cell.Cell],
+        celloffset:tuple
+    ):
+        for cell in cells:
+            if cell.celloffset == celloffset:
+                return cell
+        raise ValueError
 
 
 # spreadchance per biome (minspreadchance,maxspreadchance)

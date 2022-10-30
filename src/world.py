@@ -11,6 +11,7 @@ class World:
         seed = input("Give world seed: ")
         self.generator = worldgen.WorldGenerator(seed)
         print("Generating world...")
+        self.cells = []
         self.cells = self.generateInitialNine()
         return
 
@@ -19,7 +20,7 @@ class World:
     )->list[cell.Cell]:
 
         print("Cell : " + str((0,0)))
-        origin = self.generator.genCell(0,0)
+        origin = self.generator.genCell(self.cells,0,0)
 
         cells = []
         sidelength = 3
@@ -30,8 +31,9 @@ class World:
                     cells.append(origin)
                 else:
                     print("Cell: " + str((r,c)))
-                    cells.append(self.generator.genCell(r,c))
+                    cells.append(self.generator.genCell(self.cells,r,c))
             
+        
         return cells
 
     # Solution: keep list of cells with coord members, is robust for negative coordinates and dynamic cell generation
