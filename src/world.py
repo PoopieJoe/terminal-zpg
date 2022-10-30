@@ -29,9 +29,9 @@ class World:
                 newcell = self.generator.genCell(cells,c,r)
                 cells.append(newcell)
                 print("Cell: " + str((c,r)))
-                printmap(newcell.landmap,"Landmap Cell ({},{})".format(c,r))
+                # printmap(newcell.landmap,"Landmap Cell ({},{})".format(c,r))
             
-        plt.show()
+        # plt.show()
         return cells
 
     # Solution: keep list of cells with coord members, is robust for negative coordinates and dynamic cell generation

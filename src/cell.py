@@ -1,4 +1,7 @@
 import copy
+from xmlrpc.client import Boolean
+
+import numpy as np
 from src.constants import *
 
 
@@ -12,13 +15,9 @@ class Cell:
         self,
         offsetx:int,
         offsety:int,
-        landmap = None
+        landmap:np.ndarray = None
     ):
         self.isloaded = False
-        # if fill == None:
-        #     self.data = [[Tile(WORLDTILETYPES.VOID) for _ in range(CELLSIZEW)] for _ in range(CELLSIZEH)]
-        # else:
-        #     self.data = [[Tile(fill) for _ in range(CELLSIZEW)] for _ in range(CELLSIZEH)]
         self.landmap = landmap
 
         self.celloffset = (offsetx,offsety)                             # offset in cells
@@ -29,16 +28,16 @@ class Cell:
         self.bottomright = (self.bottomleft[0]+CELLSIZEW-1,self.bottomleft[1])
         return
 
-    def getTile(
+    def getLand(
         self,
         coord:tuple
-    ) -> Tile:
-        return self.data[coord[0]][coord[1]]
+    ) -> int:
+        return self.landmap[coord[0],coord[1]]
 
     def setTile(
         self,
         coord:tuple,
         value:Tile
-    ):
-        self.data[coord[0]][coord[1]] = value
+    ) -> int:
+        self.landmap[coord[0],coord[1]] = value
         return
