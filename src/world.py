@@ -1,6 +1,8 @@
 import math
 import json
 import random
+import numpy as np
+import matplotlib.pyplot as plt
 import src.cell as cell
 import src.worldgen as worldgen
 from src.constants import *    
@@ -19,21 +21,17 @@ class World:
         self
     )->list[cell.Cell]:
 
-        print("Cell : " + str((0,0)))
-        origin = self.generator.genCell(self.cells,0,0)
-
         cells = []
         sidelength = 3
         radius = math.floor(sidelength/2)
-        for r in range(-radius,radius+1):
-            for c in range(-radius,radius+1):
-                if r == 0 and c == 0:
-                    cells.append(origin)
-                else:
-                    print("Cell: " + str((r,c)))
-                    cells.append(self.generator.genCell(self.cells,r,c))
+        for r in (0,-1,1):
+            for c in (0,-1,1):
+                newcell = self.generator.genCell(cells,c,r)
+                cells.append(newcell)
+                print("Cell: " + str((c,r)))
+                printmap(newcell.landmap,"Landmap Cell ({},{})".format(c,r))
             
-        
+        plt.show()
         return cells
 
     # Solution: keep list of cells with coord members, is robust for negative coordinates and dynamic cell generation
@@ -74,3 +72,13 @@ class World:
         cellOffset,tileoffset = self.coords2cellOffset(coord)
         cell = self.findCell(cellOffset)
         return cell.setTile(tileoffset,value)
+
+def printmap(
+    arr:np.ndarray,
+    title=""
+):
+    # print('\n'.join('  '.join("{:} ".format(int(x)) for x in row) for row in arr.tolist()))
+    plt.figure()
+    plt.title(title)
+    plt.imshow(arr.T,interpolation="none",origin='lower')
+    return

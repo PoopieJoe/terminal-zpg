@@ -11,7 +11,7 @@ def generateFractalNoise2d(shape, res, octaves=1, persistence=0.5):
         amplitude *= persistence
     return noise
 
-def generatePerlinNoise2d(shape, res):
+def generatePerlinNoise2d(shape, res) -> np.ndarray:
     def f(t):
         return 6*t**5 - 15*t**4 + 10*t**3
 
