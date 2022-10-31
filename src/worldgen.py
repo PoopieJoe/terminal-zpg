@@ -36,34 +36,16 @@ class WorldGenerator:
 
         # mask filter to blend raw generated map with surroundings
         blendfilter = np.empty(landmapshape)
-        blendrange = 1/6
+        blendrange = 1
         for x in range(landmapshape[0]):
             for y in range(landmapshape[1]):
                 d = max(abs(x-landmapshape[0]//2),abs(y-landmapshape[1]//2))
                 blendfilter[x,y] = max(0,(d-1/blendrange)+1)
-        blendfilter += noise.generatePerlinNoise2d(landmapshape,(4,4))*(blendfilter.max()/2)
+        blendfilter += (noise.generatePerlinNoise2d(landmapshape,(4,4))+0.5)*(blendfilter.max()/2)
         blendfilter *= 1/blendfilter.max()
 
         # Find neighbouring cells
-        # East,West,North,South
-        edges = {}
-        fakeneighbour = self._genLandmap() # generate raw
-        for dx,dy in ((1,0),(-1,0),(0,1),(0,-1)):
-            try:
-                neighbourland = self._findCell(world,(offsetx+dx,offsety+dy)).landmap
-            except ValueError: # cell does not exist, use fake neighbor
-                neighbourland = fakeneighbour
-
-            # fetch opposite side
-            match (dx,dy):
-                case (1,0): #East
-                    edges[WINDDIRECTIONS.EAST] = neighbourland[0,:] #fetch west column
-                case (-1,0): #West
-                    edges[WINDDIRECTIONS.WEST] = neighbourland[-1,:] #fetch east column
-                case (0,1): #North
-                    edges[WINDDIRECTIONS.NORTH] = neighbourland[:,0] #fetch south row
-                case (0,-1): #South
-                    edges[WINDDIRECTIONS.SOUTH] = neighbourland[:,-1] #fetch north row
+        edges = self._findEdges(world=world,offsetx=offsetx,offsety=offsety)
 
         # create interpolated landmap
         # interpolate columns
@@ -87,7 +69,7 @@ class WorldGenerator:
         
         # Land map
         # Scale = 1:2
-        rawlandmap = self._genLandmap()
+        rawlandmap = self._genLandmap(edges)
 
         # Total land map
         landmap = ( interplandmap*blendfilter + rawlandmap*(1-blendfilter) ) 
@@ -108,18 +90,59 @@ class WorldGenerator:
         c = cell.Cell(offsetx,offsety,landmap) #cell.Cell(offsetx,offsety,rawlandmap.tolist())
         return c
 
+    def _findEdges(
+        self,
+        world,
+        offsetx,
+        offsety
+    ):
+        # East,West,North,South
+        edges = {}
+        fakeneighbour = self._genLandmap() # generate raw
+        for dx,dy in ((1,0),(-1,0),(0,1),(0,-1)):
+            try:
+                neighbourland = self._findCell(world,(offsetx+dx,offsety+dy)).landmap
+            except ValueError: # cell does not exist, use fake neighbor
+                neighbourland = fakeneighbour
+
+            # fetch opposite side
+            match (dx,dy):
+                case (1,0): #East
+                    edges[WINDDIRECTIONS.EAST] = neighbourland[0,:] #fetch west column
+                case (-1,0): #West
+                    edges[WINDDIRECTIONS.WEST] = neighbourland[-1,:] #fetch east column
+                case (0,1): #North
+                    edges[WINDDIRECTIONS.NORTH] = neighbourland[:,0] #fetch south row
+                case (0,-1): #South
+                    edges[WINDDIRECTIONS.SOUTH] = neighbourland[:,-1] #fetch north row
+        return edges
+
     def _genLandmap(
-        self
+        self,
+        edges = None
     ):
 
         def _addland(
             arr:np.ndarray,
-            likelyhood
+            likelyhood,
+            edges:dict = None
         ):
             w,h = arr.shape
             for c in range(w):
                 for r in range(h):
-                    if random.random() < likelyhood:
+                    if edges != None:
+                        if c == 0: 
+                            modifier = edges[WINDDIRECTIONS.WEST][r]-0.5
+                        elif c == w-1:
+                            modifier = edges[WINDDIRECTIONS.EAST][r]-0.5
+                        elif r == 0:
+                            modifier = edges[WINDDIRECTIONS.SOUTH][r]-0.5
+                        elif r == h-1:
+                            modifier = edges[WINDDIRECTIONS.NORTH][r]-0.5
+                    else:
+                        modifier = 0
+
+                    if random.random() < likelyhood + modifier/4:
                         arr[c,r] = 1
             return arr
 
@@ -130,13 +153,13 @@ class WorldGenerator:
         landarr = np.zeros([w,h])
 
         # generate major landmass
-        landarr = _addland(landarr,1/4)
+        landarr = _addland(landarr,1/4,edges)
 
         # upscale by 2 and slightly randomize values
         landarr = self._upscale2dwithnoise(landarr, n=2, noisefactor = noise, clip=(0,1))
 
         # add minor landmasses
-        landarr = _addland(landarr,1/3)
+        landarr = _addland(landarr,1/3,edges)
 
         # upscale by 2 and slightly randomize values
         landarr = self._upscale2dwithnoise(landarr, n=2, noisefactor = noise, clip=(0,1))
