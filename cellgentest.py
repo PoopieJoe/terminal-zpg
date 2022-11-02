@@ -10,7 +10,7 @@ nCells = 100
 cellReport = []
 for i in range(nCells):
     print("Cell " + str(i+1) + " out of " + str(nCells))
-    newcell = generator.genCell(0,0)
+    newcell = generator.genMap(0,0)
     # count number of tiles of each biome
     types = []
     for col in newcell.data:

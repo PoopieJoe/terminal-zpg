@@ -12,11 +12,8 @@ class WorldGenerator:
         random.seed(seed)
         self.rng = np.random.default_rng(int("".join([str(ord(char)) for char in seed])))
 
-    def genCell(
-        self,
-        world,
-        offsetx,
-        offsety
+    def genMap(
+        self
     ):
         # For future overhaul
         # Inspiration: https://www.alanzucconi.com/2022/06/05/minecraft-world-generation/
@@ -31,91 +28,60 @@ class WorldGenerator:
         # Create biome borders
         # Map biomes to climate maps
         # Create height map to determine rivers
-
-        landmapshape = (CELLSIZEW//4,CELLSIZEH//4)
-
-        # mask filter to blend raw generated map with surroundings
-        blendfilter = np.empty(landmapshape)
-        blendrange = 1
-        for x in range(landmapshape[0]):
-            for y in range(landmapshape[1]):
-                d = max(abs(x-landmapshape[0]//2),abs(y-landmapshape[1]//2))
-                blendfilter[x,y] = max(0,(d-1/blendrange)+1)
-        blendfilter += (noise.generatePerlinNoise2d(landmapshape,(4,4))+0.5)*(blendfilter.max()/2)
-        blendfilter *= 1/blendfilter.max()
-
-        # Find neighbouring cells
-        edges = self._findEdges(world=world,offsetx=offsetx,offsety=offsety)
-
-        # create interpolated landmap
-        # interpolate columns
-        arrcolinterp = np.empty(landmapshape)
-        for column in range(landmapshape[0]):
-            newcoly = range(landmapshape[1])
-            top = edges[WINDDIRECTIONS.NORTH][column]
-            bottom = edges[WINDDIRECTIONS.SOUTH][column]
-            colinterp = np.interp(newcoly,[-1,landmapshape[1]],[bottom,top])
-            arrcolinterp[column,:] = colinterp
-
-        arrrowinterp = np.empty(landmapshape)
-        for row in range(landmapshape[1]):
-            newrowx = range(landmapshape[0])
-            right = edges[WINDDIRECTIONS.EAST][row]
-            left = edges[WINDDIRECTIONS.WEST][row]
-            rowinterp = np.interp(newrowx,[-1,landmapshape[0]],[left,right])
-            arrrowinterp[:,row] = rowinterp
-
-        interplandmap = ( arrcolinterp + arrrowinterp ) / 2
         
         # Land map
-        # Scale = 1:2
-        rawlandmap = self._genLandmap(edges)
+        # Scale = 1:4
+        landmap = self._genLandmap()
 
-        # Total land map
-        landmap = ( interplandmap*blendfilter + rawlandmap*(1-blendfilter) ) 
+        print("Generated landmap")
 
-        # schmol gassian blur
-        kernel =  1/16*np.array([   [1,2,1],
-                                    [2,4,2],
-                                    [1,2,1]])
-        landmap = ndimage.convolve(landmap,kernel)
+        # heightmap
+        rawheightmap = noise.generateFractalNoise2d((landmap.shape[0],landmap.shape[1]),(landmap.shape[0]//128,landmap.shape[1]//128),octaves=3,persistence=1)
+        rawheightmap = (rawheightmap-rawheightmap.min())/(2*rawheightmap.max())
+
+        print("Generated raw heightmap")
         
+        # Land blendmap
+        nlayers = 9 #multiple of 2+1
+        offlayers = nlayers-1
+        layers = []
+        erosionlayer = landmap
+        dilationlayer = landmap
+        for i in range(offlayers//2):
+            layers.append(erosionlayer)
+            layers.append(dilationlayer)
+            erosionlayer = ndimage.binary_erosion(erosionlayer)
+            dilationlayer = ndimage.binary_dilation(dilationlayer)
+        blendmap = sum(layers)/offlayers
 
-        # run cellular automata to smooth out
+        # heightoffset = 0.5#(heightmap.max() - heightmap.min())/2
+        heightmap = offlayers*(rawheightmap+blendmap)/2-offlayers/2
+        print("Blended heightmap with landmap")
+        layerdheightmap = np.rint(heightmap)
+        print("Generated height layers")
 
-        # round to 1 or 0
-        landmap = np.clip(np.rint(landmap),0,1)
+        printmap(heightmap,"Heightmap")
+        
+        # place rivers
+        rivers,nrivers,nlakes = self._placerivers(heightmap)
+        print("Generated " + str(nrivers) + " rivers, and " +str(nlakes) + " lakes")
 
-        # Fill cell
-        c = cell.Cell(offsetx,offsety,landmap) #cell.Cell(offsetx,offsety,rawlandmap.tolist())
-        return c
+        # landmap = landmap*(1-rivers)
+        # landmap = self._upscale2dwithnoise(landmap,n=2,noisefactor=0.4,iter=2,clip=(0,1))
+        # printmap(landmap,"landmap with rivers")
 
-    def _findEdges(
-        self,
-        world,
-        offsetx,
-        offsety
-    ):
-        # East,West,North,South
-        edges = {}
-        fakeneighbour = self._genLandmap() # generate raw
-        for dx,dy in ((1,0),(-1,0),(0,1),(0,-1)):
-            try:
-                neighbourland = self._findCell(world,(offsetx+dx,offsety+dy)).landmap
-            except ValueError: # cell does not exist, use fake neighbor
-                neighbourland = fakeneighbour
 
-            # fetch opposite side
-            match (dx,dy):
-                case (1,0): #East
-                    edges[WINDDIRECTIONS.EAST] = neighbourland[0,:] #fetch west column
-                case (-1,0): #West
-                    edges[WINDDIRECTIONS.WEST] = neighbourland[-1,:] #fetch east column
-                case (0,1): #North
-                    edges[WINDDIRECTIONS.NORTH] = neighbourland[:,0] #fetch south row
-                case (0,-1): #South
-                    edges[WINDDIRECTIONS.SOUTH] = neighbourland[:,-1] #fetch north row
-        return edges
+
+        plt.show()
+
+        # Fill cells
+        cells = []
+        offsetx = 0
+        offsety = 0
+        newcell = cell.Cell(offsetx,offsety,landmap) #cell.Cell(offsetx,offsety,rawlandmap.tolist())
+
+        cells.append(newcell)
+        return cells
 
     def _genLandmap(
         self,
@@ -130,26 +96,14 @@ class WorldGenerator:
             w,h = arr.shape
             for c in range(w):
                 for r in range(h):
-                    if edges != None:
-                        if c == 0: 
-                            modifier = edges[WINDDIRECTIONS.WEST][r]-0.5
-                        elif c == w-1:
-                            modifier = edges[WINDDIRECTIONS.EAST][r]-0.5
-                        elif r == 0:
-                            modifier = edges[WINDDIRECTIONS.SOUTH][r]-0.5
-                        elif r == h-1:
-                            modifier = edges[WINDDIRECTIONS.NORTH][r]-0.5
-                    else:
-                        modifier = 0
-
-                    if random.random() < likelyhood + modifier/4:
+                    if random.random() < likelyhood:
                         arr[c,r] = 1
             return arr
 
         # base array
         noise = 0.4
-        w = CELLSIZEW//64
-        h = CELLSIZEH//64
+        w = CELLSIZEW//512
+        h = CELLSIZEH//512
         landarr = np.zeros([w,h])
 
         # generate major landmass
@@ -159,29 +113,32 @@ class WorldGenerator:
         landarr = self._upscale2dwithnoise(landarr, n=2, noisefactor = noise, clip=(0,1))
 
         # add minor landmasses
-        landarr = _addland(landarr,1/3,edges)
+        landarr = _addland(landarr,1/4,edges)
 
         # upscale by 2 and slightly randomize values
-        landarr = self._upscale2dwithnoise(landarr, n=2, noisefactor = noise, clip=(0,1))
+        landarr = self._upscale2dwithnoise(landarr, n=2, noisefactor = noise, iter=2, clip=(0,1))
 
-        # add tiny islands
+        # add islands
         landarr = _addland(landarr,1/16) # less common
 
         # upscale by 2 and slightly randomize values
         landarr = self._upscale2dwithnoise(landarr, n=2, noisefactor = noise, iter=2, clip=(0,1))
 
+        # add small islands
+        landarr = _addland(landarr,1/256) # less common
+
+        # upscale by 2 and slightly randomize values
+        landarr = self._upscale2dwithnoise(landarr, n=2, noisefactor = noise, iter=1, clip=(0,1))
+
         # pass with gassian noise to smooth out
-        kernel =  1/16*np.array([   [1,2,1],
-                                    [2,4,2],
-                                    [1,2,1]])
-        # kernel = 1/256*np.array([   [1,4,6,4,1],
-        #                             [4,16,24,16,4],
-        #                             [6,24,36,24,6],
-        #                             [4,16,24,16,4],
-        #                             [1,4,6,4,1]])
+        # kernel =  1/16*np.array([   [1,2,1],
+        #                             [2,4,2],
+        #                             [1,2,1]])
+        kernel = gaussKern(2,1.)
         landarr = ndimage.convolve(landarr,kernel)
-        # landarr = np.rint(landarr)
-        landarr = np.clip(landarr,0,1)
+        landarr = np.clip(np.rint(landarr),0,1)
+        
+        # run cellular automata to smooth out
 
         return landarr
 
@@ -200,13 +157,87 @@ class WorldGenerator:
 
             # add linear noise between -rfactor and +rfactor
             arr = arr + 2*noisefactor*(self.rng.random(arr.shape)-0.5)
-            arr = np.rint(arr) #round to integers
-
+            
             # clip if limits are given
             if clip != None:
+                arr = np.rint(arr) #round to integers
                 arr = np.clip(arr,clip[0],clip[1])
             
         return arr
+
+    def _placerivers(
+        self,
+        heightmap:np.ndarray
+    ):
+        def randomizeDirection(direction:tuple,changechance):
+            if direction == (0,0): return (0,0) # no change
+                
+            directions = ((-1,-1),(-1,0),(-1,1),(0,1),(1,1),(1,0),(1,-1),(0,-1))
+            dirindex = directions.index(direction)
+            roll = random.random()
+            if roll<changechance/2:
+                return directions[(dirindex+1)%len(directions)]
+            elif roll<changechance:
+                return directions[(dirindex-1)%len(directions)]
+            else:
+                return direction
+
+
+        rivermap = np.zeros(heightmap.shape)
+
+        # fetch gradients
+        # gradients = ndimage.gaussian_gradient_magnitude(heightmap,sigma=4)
+
+        # start rivers
+        w,h = heightmap.shape
+        relheightmap = heightmap/heightmap.max()
+        likelyhood = 0.005*relheightmap
+        gradius = 6
+        maxlakesize = 4
+        nrivers = 0
+        nlakes = 0
+        for c in range(w):
+            for r in range(h):
+                if(random.random() < likelyhood[c,r]):
+                    
+                    riverlen = 0
+                    start = (c,r)
+                    lastdirection = (0,0)
+                    while(  heightmap[c,r] > -1
+                            and riverlen < 1000
+                            and (c >= gradius and c <= w-gradius and r >= gradius and r <= h-gradius)):
+                        # weighted drunk walk
+                        # fetch local gradient
+                        gradient = heightmap[c-gradius:c+gradius+1,r-gradius:r+gradius+1]-heightmap[c,r]
+                        #pick highest downward gradient
+                        desireddirection = np.unravel_index(gradient.argmin(),gradient.shape)
+                        desireddirection = (math.ceil(desireddirection[0]/gradius) - 1,math.ceil(desireddirection[1]/gradius) - 1)
+                        if desireddirection == (0,0): # found a minimum
+                            # create lake
+                            lakesize = max(int(maxlakesize*random.random()),1)
+                            rivermap[c-lakesize:c-lakesize+1,r-lakesize:r-lakesize+1] = 1
+                            nlakes += 1
+                        #now randomize
+                        if random.random()<0.5: # see if we go toward the lower gradient
+                            direction = desireddirection
+                        else:
+                            direction = lastdirection
+                        direction = randomizeDirection(direction,0.5) #local meandering
+
+                        # step in that direction
+                        c += direction[0]
+                        r += direction[1]
+
+                        if rivermap[c,r]: break # met another river
+                        rivermap[c,r] = 1
+                        riverlen +=1
+                        lastdirection = direction
+
+                    if riverlen > 0:
+                        nrivers += 1
+        
+        rivermap = ndimage.binary_dilation(rivermap)
+        return rivermap,nrivers,nlakes
 
     def _findCell(
         self,
@@ -238,3 +269,12 @@ def printmap(
     plt.title(title)
     plt.imshow(arr.T,interpolation="none",origin='lower')
     return
+
+def gaussKern(l=5, sig=1.):
+    """\
+    creates gaussian kernel with side length `l` and a sigma of `sig`
+    """
+    ax = np.linspace(-(l - 1) / 2., (l - 1) / 2., l)
+    gauss = np.exp(-0.5 * np.square(ax) / np.square(sig))
+    kernel = np.outer(gauss, gauss)
+    return kernel / np.sum(kernel)

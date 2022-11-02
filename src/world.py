@@ -14,25 +14,8 @@ class World:
         self.generator = worldgen.WorldGenerator(seed)
         print("Generating world...")
         self.cells = []
-        self.cells = self.generateInitialNine()
+        self.cells = self.generator.genMap()
         return
-
-    def generateInitialNine(
-        self
-    )->list[cell.Cell]:
-
-        cells = []
-        sidelength = 3
-        radius = math.floor(sidelength/2)
-        for r in (0,-1,1):
-            for c in (0,-1,1):
-                newcell = self.generator.genCell(cells,c,r)
-                cells.append(newcell)
-                print("Cell: " + str((c,r)))
-                # printmap(newcell.landmap,"Landmap Cell ({},{})".format(c,r))
-            
-        # plt.show()
-        return cells
 
     # Solution: keep list of cells with coord members, is robust for negative coordinates and dynamic cell generation
 
@@ -44,8 +27,6 @@ class World:
             if cell.celloffset == celloffset:
                 return cell
         return ValueError
-
-
 
     def coords2cellOffset(
         self,
