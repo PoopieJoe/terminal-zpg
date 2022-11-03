@@ -13,7 +13,6 @@ class World:
         seed = input("Give world seed: ")
         self.generator = worldgen.WorldGenerator(seed)
         print("Generating world...")
-        self.cells = []
         self.cells = self.generator.genMap()
         return
 
@@ -32,8 +31,8 @@ class World:
         self,
         coords:tuple
     ):
-        celloffsetx,tileoffsetx = divmod(coords[0],CELLSIZEW)
-        celloffsety,tileoffsety = divmod(coords[1],CELLSIZEH)
+        celloffsetx,tileoffsetx = divmod(coords[0]-ORIGINOFFSET[0],CELLSIZEW)
+        celloffsety,tileoffsety = divmod(coords[1]-ORIGINOFFSET[1],CELLSIZEH)
         
         return (celloffsetx, celloffsety), (tileoffsetx,tileoffsety)
 

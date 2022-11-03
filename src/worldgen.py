@@ -31,7 +31,7 @@ class WorldGenerator:
         
         # Land map
         # Scale = 1:4
-        landmap = self._genLandmap()
+        landmap = self._genLandmap(w=WORLDSIZEW//512,h=WORLDSIZEH//512)
 
         print("Generated landmap")
 
@@ -117,26 +117,43 @@ class WorldGenerator:
                         biomemap[c,r] = WORLDTILETYPES.JUNGLE
         print("Generated biomes")
 
+        print("Upscaling...")
+        # zoom in to full scale
+        landmap = self._upscale2dwithnoise(landmap,n=2,noisefactor=0.4,iter=3,clip=(0,1))
+        heightmap = self._upscale2dwithnoise(heightmap,n=2,iter=3)
+        biomemap = self._upscale2dother(biomemap,n=2**3)
+        plt.show()
+
         # split into smaller cells
+        ncellsw = WORLDSIZEW//CELLSIZEW
+        ncellsh = WORLDSIZEH//CELLSIZEH
+        centercellx = ncellsw//2
+        centercelly = ncellsh//2
 
-        # Fill cells
         cells = []
-        offsetx = 0
-        offsety = 0
-        newcell = cell.Cell(offsetx,offsety,landmap) #cell.Cell(offsetx,offsety,rawlandmap.tolist())
-
-        cells.append(newcell)
+        for cellcol in range(ncellsw):
+            for cellrow in range(ncellsh):
+                toplefttilex = cellcol*CELLSIZEW
+                toplefttiley = cellrow*CELLSIZEH
+                celloffsetx = cellcol - centercellx
+                celloffsety = cellrow - centercelly
+                newcell = cell.Cell(celloffsetx,celloffsety,
+                                                landmap[toplefttilex:toplefttilex+CELLSIZEW-1,toplefttiley:toplefttiley+CELLSIZEH-1],
+                                                heightmap[toplefttilex:toplefttilex+CELLSIZEW-1,toplefttiley:toplefttiley+CELLSIZEH-1],
+                                                biomemap[toplefttilex:toplefttilex+CELLSIZEW-1,toplefttiley:toplefttiley+CELLSIZEH-1])
+                cells.append(newcell)
+        print("Done")
         return cells
 
     def _genLandmap(
         self,
-        edges = None
+        w = WORLDSIZEW//512,
+        h = WORLDSIZEH//512
     ):
 
         def _addland(
             arr:np.ndarray,
-            likelyhood,
-            edges:dict = None
+            likelyhood
         ):
             w,h = arr.shape
             for c in range(w):
@@ -147,18 +164,16 @@ class WorldGenerator:
 
         # base array
         noise = 0.4
-        w = CELLSIZEW//512
-        h = CELLSIZEH//512
         landarr = np.zeros([w,h])
 
         # generate major landmass
-        landarr = _addland(landarr,1/4,edges)
+        landarr = _addland(landarr,1/4)
 
         # upscale by 2 and slightly randomize values
         landarr = self._upscale2dwithnoise(landarr, n=2, noisefactor = noise, clip=(0,1))
 
         # add minor landmasses
-        landarr = _addland(landarr,1/4,edges)
+        landarr = _addland(landarr,1/4)
 
         # upscale by 2 and slightly randomize values
         landarr = self._upscale2dwithnoise(landarr, n=2, noisefactor = noise, iter=2, clip=(0,1))
@@ -209,6 +224,15 @@ class WorldGenerator:
                 arr = np.clip(arr,clip[0],clip[1])
             
         return arr
+
+    def _upscale2dother(
+        self,
+        arr:np.ndarray,
+        n=2
+    ):
+        newarr = np.repeat(arr,n,axis=0)
+        newarr = np.repeat(newarr,n,axis=1)
+        return newarr
 
     def _placerivers(
         self,

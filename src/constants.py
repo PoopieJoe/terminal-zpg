@@ -179,10 +179,13 @@ class WindDirections(CONSTANTOBJECT):
         self.NORTHWEST = "Northwest"
 WINDDIRECTIONS = WindDirections()
 
-CELLSIZEW = 4096
-CELLSIZEH = 4096
+WORLDSIZEW = 4096
+WORLDSIZEH = 4096
+
+CELLSIZEW = 256
+CELLSIZEH = 256
 CELLSIZE = (CELLSIZEW,CELLSIZEH)
-ORIGINOFFSET = (math.floor(CELLSIZEW/2),math.floor(CELLSIZEH/2))
+ORIGINOFFSET = (math.floor(WORLDSIZEW/2),math.floor(WORLDSIZEH/2))
 class WorldTileTypes(CONSTANTOBJECT):
     def __init__(self):
         super().__init__()

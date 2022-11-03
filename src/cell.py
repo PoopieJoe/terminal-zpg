@@ -15,10 +15,14 @@ class Cell:
         self,
         offsetx:int,
         offsety:int,
-        landmap:np.ndarray = None
+        landmap:np.ndarray = None,
+        heightmap:np.ndarray = None,
+        biomemap:np.ndarray = None
     ):
         self.isloaded = False
         self.landmap = landmap
+        self.heightmap = heightmap
+        self.biomemap = biomemap
 
         self.celloffset = (offsetx,offsety)                             # offset in cells
 

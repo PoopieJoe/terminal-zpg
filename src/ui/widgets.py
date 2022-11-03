@@ -21,7 +21,7 @@ class MapRenderer(tk.Frame):
 
         # empty canvas
         renderareasize = 3      # render area size in chunks (3x3)
-        cellsize = (CELLSIZEW//2,CELLSIZEH//2)
+        cellsize = CELLSIZE
         tilesize = (math.floor(framesize/(renderareasize*cellsize[0])),math.floor(framesize/(renderareasize*cellsize[1])))            # size of a tile in px
         width = renderareasize*cellsize[0]*tilesize[0]
         height = renderareasize*cellsize[1]*tilesize[1]
