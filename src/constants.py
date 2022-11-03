@@ -193,6 +193,8 @@ class WorldTileTypes(CONSTANTOBJECT):
         self.OCEAN = "Ocean"
         self.MOUNTAIN = "Mountain"
         self.TUNDRA = "Tundra"
+        self.TAIGA = "Taiga"
+        self.JUNGLE = "Jungle"
         self.MOUNTAINPEAK = "Mountain_peak"
 
 WORLDTILETYPES = WorldTileTypes()

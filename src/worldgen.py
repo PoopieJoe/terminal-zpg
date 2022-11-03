@@ -36,8 +36,13 @@ class WorldGenerator:
         print("Generated landmap")
 
         # heightmap
-        rawheightmap = noise.generateFractalNoise2d((landmap.shape[0],landmap.shape[1]),(landmap.shape[0]//128,landmap.shape[1]//128),octaves=8,persistence=1)
-        rawheightmap = (rawheightmap-rawheightmap.min())/(2*rawheightmap.max())
+        rawheightmap = noise.generateFractalNoise2d(    (landmap.shape[0],landmap.shape[1]),
+                                                        (landmap.shape[0]//128,landmap.shape[1]//128),
+                                                        generator=self.rng,
+                                                        octaves=4,
+                                                        persistence=0.4)
+        rawheightmap -= rawheightmap.min()
+        rawheightmap /= rawheightmap.max()
 
         print("Generated raw heightmap")
         
@@ -67,8 +72,54 @@ class WorldGenerator:
         print("Generated " + str(nrivers) + " rivers and " +str(nlakes) + " lakes")
 
         # generate biomes
+        tempmap = noise.generateFractalNoise2d(         (landmap.shape[0],landmap.shape[1]),
+                                                        (landmap.shape[0]//256,landmap.shape[1]//256),
+                                                        generator=self.rng,
+                                                        octaves=2)
+        tempmap -= tempmap.min()
+        tempmap /= tempmap.max()
+        #discretize into 3 categories
+        tempmap = np.rint(2*tempmap) #0,1,2
 
+        rainmap = noise.generateFractalNoise2d( (landmap.shape[0],landmap.shape[1]),
+                                                (landmap.shape[0]//256,landmap.shape[1]//256),
+                                                generator=self.rng,
+                                                octaves=2)
+        rainmap -= rainmap.min()
+        rainmap /= rainmap.max()
+        rainmap = np.rint(2*rainmap) #0,1,2
 
+        printmap(tempmap,"tempmap")
+        printmap(rainmap,"rainmap")
+
+        #divvy biomes
+        strlen = 16
+        biomemap = np.chararray((heightmap.shape[0],heightmap.shape[1],strlen))
+        for c in biomemap.shape[0]:
+            for r in biomemap.shape[1]:
+                temp = tempmap[c,r]
+                rain = rainmap[c,r]
+                if temp == 0:
+                    if rain == 0:
+                        biomemap[c,r] = WORLDTILETYPES.TUNDRA
+                    elif rain == 1:
+                        biomemap[c,r] = WORLDTILETYPES.TAIGA
+                    else:
+                        biomemap[c,r] = WORLDTILETYPES.TAIGA
+                elif temp == 1:
+                    if rain == 0:
+                        biomemap[c,r] = WORLDTILETYPES.PLAINS
+                    elif rain == 1:
+                        biomemap[c,r] = WORLDTILETYPES.FOREST
+                    else:
+                        biomemap[c,r] = WORLDTILETYPES.FOREST
+                else:
+                    if rain == 0:
+                        biomemap[c,r] = WORLDTILETYPES.DESERT
+                    elif rain == 1:
+                        biomemap[c,r] = WORLDTILETYPES.PLAINS
+                    else:
+                        biomemap[c,r] = WORLDTILETYPES.JUNGLE
         plt.show()
 
         # Fill cells
