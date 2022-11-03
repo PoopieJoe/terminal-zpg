@@ -62,10 +62,8 @@ class WorldGenerator:
         # heightoffset = 0.5#(heightmap.max() - heightmap.min())/2
         heightmap = offlayers*(rawheightmap+blendmap)/2-offlayers/2
         print("Blended heightmap with landmap")
-        layerdheightmap = np.rint(heightmap)
+        # layerdheightmap = np.rint(heightmap)
         print("Generated height layers")
-
-        printmap(heightmap,"Heightmap")
         
         # place rivers
         rivers,nrivers,nlakes = self._placerivers(heightmap)
@@ -89,14 +87,11 @@ class WorldGenerator:
         rainmap /= rainmap.max()
         rainmap = np.rint(2*rainmap) #0,1,2
 
-        printmap(tempmap,"tempmap")
-        printmap(rainmap,"rainmap")
-
         #divvy biomes
         strlen = 16
         biomemap = np.chararray((heightmap.shape[0],heightmap.shape[1],strlen))
-        for c in biomemap.shape[0]:
-            for r in biomemap.shape[1]:
+        for c in range(biomemap.shape[0]):
+            for r in range(biomemap.shape[1]):
                 temp = tempmap[c,r]
                 rain = rainmap[c,r]
                 if temp == 0:
@@ -120,7 +115,9 @@ class WorldGenerator:
                         biomemap[c,r] = WORLDTILETYPES.PLAINS
                     else:
                         biomemap[c,r] = WORLDTILETYPES.JUNGLE
-        plt.show()
+        print("Generated biomes")
+
+        # split into smaller cells
 
         # Fill cells
         cells = []
