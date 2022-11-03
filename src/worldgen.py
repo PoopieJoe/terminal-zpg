@@ -36,7 +36,7 @@ class WorldGenerator:
         print("Generated landmap")
 
         # heightmap
-        rawheightmap = noise.generateFractalNoise2d((landmap.shape[0],landmap.shape[1]),(landmap.shape[0]//128,landmap.shape[1]//128),octaves=3,persistence=1)
+        rawheightmap = noise.generateFractalNoise2d((landmap.shape[0],landmap.shape[1]),(landmap.shape[0]//128,landmap.shape[1]//128),octaves=8,persistence=1)
         rawheightmap = (rawheightmap-rawheightmap.min())/(2*rawheightmap.max())
 
         print("Generated raw heightmap")
@@ -64,12 +64,9 @@ class WorldGenerator:
         
         # place rivers
         rivers,nrivers,nlakes = self._placerivers(heightmap)
-        print("Generated " + str(nrivers) + " rivers, and " +str(nlakes) + " lakes")
+        print("Generated " + str(nrivers) + " rivers and " +str(nlakes) + " lakes")
 
-        # landmap = landmap*(1-rivers)
-        # landmap = self._upscale2dwithnoise(landmap,n=2,noisefactor=0.4,iter=2,clip=(0,1))
-        # printmap(landmap,"landmap with rivers")
-
+        # generate biomes
 
 
         plt.show()
@@ -155,7 +152,7 @@ class WorldGenerator:
             # cubic interpolation
             arr = ndimage.zoom(arr,zoom=n)
 
-            # add linear noise between -rfactor and +rfactor
+            # add linear noise between -noisefactor and +noisefactor
             arr = arr + 2*noisefactor*(self.rng.random(arr.shape)-0.5)
             
             # clip if limits are given
@@ -182,40 +179,35 @@ class WorldGenerator:
             else:
                 return direction
 
-
-        rivermap = np.zeros(heightmap.shape)
-
-        # fetch gradients
-        # gradients = ndimage.gaussian_gradient_magnitude(heightmap,sigma=4)
+        tmpheightmap = heightmap#pooling(heightmap,(2,2),'mean') # zoom out to make it faster
+        rivermap = np.zeros(tmpheightmap.shape)
 
         # start rivers
-        w,h = heightmap.shape
-        relheightmap = heightmap/heightmap.max()
-        likelyhood = 0.005*relheightmap
-        gradius = 6
-        maxlakesize = 4
+        w,h = tmpheightmap.shape
+        relheightmap = tmpheightmap/tmpheightmap.max()
+        likelyhood = 0.01*relheightmap
+        gradius = 3
+        maxlakesize = 3
         nrivers = 0
         nlakes = 0
         for c in range(w):
             for r in range(h):
                 if(random.random() < likelyhood[c,r]):
-                    
+                    # weighted drunk walk
                     riverlen = 0
-                    start = (c,r)
                     lastdirection = (0,0)
-                    while(  heightmap[c,r] > -1
+                    while(  tmpheightmap[c,r] > -1
                             and riverlen < 1000
                             and (c >= gradius and c <= w-gradius and r >= gradius and r <= h-gradius)):
-                        # weighted drunk walk
                         # fetch local gradient
-                        gradient = heightmap[c-gradius:c+gradius+1,r-gradius:r+gradius+1]-heightmap[c,r]
+                        gradient = tmpheightmap[c-gradius:c+gradius+1,r-gradius:r+gradius+1]-tmpheightmap[c,r]
                         #pick highest downward gradient
                         desireddirection = np.unravel_index(gradient.argmin(),gradient.shape)
                         desireddirection = (math.ceil(desireddirection[0]/gradius) - 1,math.ceil(desireddirection[1]/gradius) - 1)
                         if desireddirection == (0,0): # found a minimum
                             # create lake
                             lakesize = max(int(maxlakesize*random.random()),1)
-                            rivermap[c-lakesize:c-lakesize+1,r-lakesize:r-lakesize+1] = 1
+                            rivermap[c-lakesize:c+lakesize+1,r-lakesize:r+lakesize+1] = 1
                             nlakes += 1
                         #now randomize
                         if random.random()<0.5: # see if we go toward the lower gradient
@@ -236,7 +228,10 @@ class WorldGenerator:
                     if riverlen > 0:
                         nrivers += 1
         
-        rivermap = ndimage.binary_dilation(rivermap)
+        rivermap = ndimage.binary_dilation(rivermap,iterations=2)
+        # kernel = gaussKern(l=2,sig=1)
+        # rivermap = ndimage.convolve(rivermap,kernel)        
+        # rivermap = np.clip(np.rint(rivermap),0,1)
         return rivermap,nrivers,nlakes
 
     def _findCell(
@@ -278,3 +273,42 @@ def gaussKern(l=5, sig=1.):
     gauss = np.exp(-0.5 * np.square(ax) / np.square(sig))
     kernel = np.outer(gauss, gauss)
     return kernel / np.sum(kernel)
+
+def pooling(mat,ksize,method='max',pad=False):
+    '''Non-overlapping pooling on 2D or 3D data.
+
+    <mat>: ndarray, input array to pool.
+    <ksize>: tuple of 2, kernel size in (ky, kx).
+    <method>: str, 'max for max-pooling, 
+                   'mean' for mean-pooling.
+    <pad>: bool, pad <mat> or not. If no pad, output has size
+           n//f, n being <mat> size, f being kernel size.
+           if pad, output has size ceil(n/f).
+
+    Return <result>: pooled matrix.
+    '''
+
+    m, n = mat.shape[:2]
+    ky,kx=ksize
+
+    _ceil=lambda x,y: int(np.ceil(x/float(y)))
+
+    if pad:
+        ny=_ceil(m,ky)
+        nx=_ceil(n,kx)
+        size=(ny*ky, nx*kx)+mat.shape[2:]
+        mat_pad=np.full(size,np.nan)
+        mat_pad[:m,:n,...]=mat
+    else:
+        ny=m//ky
+        nx=n//kx
+        mat_pad=mat[:ny*ky, :nx*kx, ...]
+
+    new_shape=(ny,ky,nx,kx)+mat.shape[2:]
+
+    if method=='max':
+        result=np.nanmax(mat_pad.reshape(new_shape),axis=(1,3))
+    else:
+        result=np.nanmean(mat_pad.reshape(new_shape),axis=(1,3))
+
+    return result
