@@ -1,6 +1,8 @@
 import math
+import numpy as np
+# import matplotlib.pyplot as plt
+from scipy import ndimage
 import tkinter as tk
-from tkinter.tix import CELL
 import src.control as control
 import src.cell as cell
 import src.world as world
@@ -18,45 +20,47 @@ class MapRenderer(tk.Frame):
         framew = SCREENW
         frameh = SCREENH    
         framesize = min(frameh,framew) # take minimum to be square
-
-        # empty canvas
         renderareasize = 3      # render area size in chunks (3x3)
-        cellsize = CELLSIZE
-        tilesize = (math.floor(framesize/(renderareasize*cellsize[0])),math.floor(framesize/(renderareasize*cellsize[1])))            # size of a tile in px
-        width = renderareasize*cellsize[0]*tilesize[0]
-        height = renderareasize*cellsize[1]*tilesize[1]
-        mapCanvas = tk.Canvas(self,width=width,height=height,bg="white")
-        mapCanvas.pack()
+        
+        tilesize = (math.floor(framesize/(renderareasize*CELLSIZEW)),math.floor(framesize/(renderareasize*CELLSIZEH)))            # size of a tile in px
+        width = renderareasize*CELLSIZEW*tilesize[0]
+        height = renderareasize*CELLSIZEH*tilesize[1]
 
         # load relevant chunks (3x3 centered around character)
         radius = math.floor(renderareasize/2)
-        charchunk,tileoffset = map.coords2cellOffset(coords)   # chunk of character
+        charcellcoord,tileoffset = map.coords2cellOffset(coords)   # chunk of character
+        charcell = map.findCell((coords[0]-radius,coords[1]+radius))
+        topleftcoord = charcell.topleft #this coordinate is mapped to 0,0 on the canvas
 
-        topleftcoord = map.findCell((coords[0]-radius,coords[1]+radius)).topleft #this coordinate is mapped to 0,0 on the canvas
-
-        for celloffsetx in range(charchunk[0]-radius,charchunk[0]+radius+1):
-            for celloffsety in range(charchunk[1]-radius,charchunk[1]+radius+1):
+        loadedmap = np.zeros((CELLSIZEW*(2*radius+1),CELLSIZEH*(2*radius+1)))
+        for celloffsetx in range(charcellcoord[0]-radius,charcellcoord[0]+radius+1):
+            for celloffsety in range(charcellcoord[1]-radius,charcellcoord[1]+radius+1):
                 land = map.findCell((celloffsetx,celloffsety)).landmap
 
-                for xoffset in range(land.shape[0]):
-                    for yoffset in range(land.shape[1]):
-                        if land[xoffset,yoffset] == 1:
-                            color = "darkgreen"
-                        else:
-                            color = "darkblue"
+                loadedmap[CELLSIZEW*(celloffsetx+radius):CELLSIZEW*(celloffsetx+radius+1)-1,
+                            CELLSIZEH*(celloffsety+radius):CELLSIZEH*(celloffsety+radius+1)-1] = land
 
-                        rendertilecoord = ( (celloffsetx+radius)*cellsize[0]//2+xoffset,
-                                            (celloffsety+radius)*cellsize[1]//2+yoffset)
-                        canvascoord =     ( rendertilecoord[0]*tilesize[0],
-                                            height-rendertilecoord[1]*tilesize[1])
-                #         rendertilecoord = (currentCell.topleft[0]-topleftcoord[0]+xoffset,topleftcoord[1]-currentCell.topleft[1]+yoffset)
-                #         canvascoord = (rendertilecoord[0]*tilesize[0],rendertilecoord[1]*tilesize[1])
-                        mapCanvas.create_rectangle( [canvascoord[0],
-                                                    canvascoord[1],
-                                                    (canvascoord[0] + tilesize[0]),
-                                                    (canvascoord[1] - tilesize[1])],
-                                                    width=0,
-                                                    fill=color)
+        # fill canvas
+        def _photo_image(image: np.ndarray,grey=False):
+            height, width = image.shape
+            if grey:
+                newimage = np.empty((height,width,3))
+                newimage[:,:,0] = image*255
+                newimage[:,:,1] = image*255
+                newimage[:,:,2] = image*255
+                image = newimage
+            data = f'P6 {width} {height} 255\n'.encode() + newimage.astype(np.uint8).tobytes()
+
+            with open('example.ppm', 'wb') as file:
+                file.write(data)
+                newimage.tofile(file)
+
+            return tk.PhotoImage(width=width, height=height, data=data, format='PPM')
+        img = _photo_image(loadedmap,grey=True)        
+
+        mapCanvas = tk.Canvas(self,width=img.width(),height=img.height(),bg="magenta")
+        mapCanvas.pack()
+        mapCanvas.create_image(0,0,image=img,tags="image")
 
 
         return
@@ -75,3 +79,12 @@ BIOMECOLORMAP = {
 
         
 
+# def printmap(
+#     arr:np.ndarray,
+#     title=""
+# ):
+#     # print('\n'.join('  '.join("{:} ".format(int(x)) for x in row) for row in arr.tolist()))
+#     plt.figure()
+#     plt.title(title)
+#     plt.imshow(arr.T,interpolation="none",origin='lower')
+#     return
