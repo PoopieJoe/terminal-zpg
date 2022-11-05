@@ -30,11 +30,11 @@ class GUI(tk.Tk):
         #   Frames
         self.frames = {}
         for f in (FrameHome,FrameWorld): # defined subclasses of BaseFrame
-            frame = f(self, self.rootcontainer)
+            frame = f(frameController=self, master=self.rootcontainer)
             frame.grid(row=0, column=0, sticky=tk.NW+tk.SE)
             frame.config(bg="black")
             self.frames[f] = frame
-        self.showFrame(FrameWorld)
+        self.showFrame(FrameHome)
 
     def showFrame(self, frameclass):
         self.frames[frameclass].tkraise()
@@ -62,10 +62,13 @@ class FrameHome(BaseFrame):
         self.top_bar.grid(row=0,column=0,padx=5,pady=5)
 
         self.quit_button = tk.Button(self.top_bar,text="Quit", command=self.quit)
-        self.quit_button.pack(side="right")
+        self.quit_button.grid(row=0,column=2)
+
+        self.map_button = tk.Button(self.top_bar,text="Switch to map view",command=lambda: self.frameController.showFrame(FrameWorld))
+        self.map_button.grid(row=0,column=1)
 
         self.title_label = tk.Label(self.top_bar,text="Title")
-        self.title_label.pack(side="left")
+        self.title_label.grid(row=0,column=0)
 
         self.bottom_panel = tk.Frame(self)
         self.bottom_panel.grid(row=1,column=0)
@@ -135,7 +138,10 @@ class FrameWorld(BaseFrame):
     def createWidgets(self):
         world = self.frameController.controller.world
         self.map = widgets.MapRenderer(self,world,(0,0))
-        self.map.pack(fill="both", expand=True)
+        self.map.grid(row=0,column=1)
+
+        self.return_button = tk.Button(self,text="Switch to main view",command=lambda: self.frameController.showFrame(FrameHome))
+        self.return_button.grid(row=0,column=0)
         return
 
 
