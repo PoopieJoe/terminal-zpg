@@ -1,6 +1,7 @@
 import random
 from collections import Counter
 import numpy as np
+import copy
 import matplotlib.pyplot as plt
 from scipy import ndimage
 import src.noise as noise
@@ -15,6 +16,13 @@ class WorldGenerator:
     def genMap(
         self
     ):
+        def clip(a,min,max):
+            if a > max:
+                return max
+            elif a < min:
+                return min
+            else:
+                return a
         # For future overhaul
         # Inspiration: https://www.alanzucconi.com/2022/06/05/minecraft-world-generation/
         # Interesting resources: 
@@ -31,38 +39,41 @@ class WorldGenerator:
         
         # Land map
         # Scale = 1:4
-        landmap = self._genLandmap(w=WORLDSIZEW//512,h=WORLDSIZEH//512)
+        w=WORLDSIZEW//512
+        h=WORLDSIZEH//512
+        landmap = self._genLandmap(w,h)
+        w,h=landmap.shape
 
+        printmap(landmap,"landmap")
         print("Generated landmap")
 
         # heightmap
-        rawheightmap = noise.generateFractalNoise2d(    (landmap.shape[0],landmap.shape[1]),
+        
+        # Calculate distance from water per pixel
+        waterdist = copy.deepcopy(landmap)
+        erosionlayer = ndimage.grey_erosion(ndimage.binary_erosion(waterdist,border_value=1),(3,3))
+        while 1 in erosionlayer.flatten():
+            erosionlayer = ndimage.grey_erosion(ndimage.binary_erosion(erosionlayer,border_value=1),(3,3))
+            waterdist += erosionlayer
+
+        # random height noise
+        heightnoisemap = noise.generateFractalNoise2d(  (landmap.shape[0],landmap.shape[1]),
                                                         (landmap.shape[0]//128,landmap.shape[1]//128),
                                                         generator=self.rng,
-                                                        octaves=4,
-                                                        persistence=0.4)
-        rawheightmap -= rawheightmap.min()
-        rawheightmap /= rawheightmap.max()
+                                                        octaves=3,
+                                                        persistence=1)
+        heightnoisemap -= heightnoisemap.min()
+        heightnoisemap /= heightnoisemap.max()
 
-        print("Generated raw heightmap")
-        
-        # Land blendmap
-        nlayers = 9 #multiple of 2+1
-        offlayers = nlayers-1
-        layers = []
-        erosionlayer = landmap
-        dilationlayer = landmap
-        for i in range(offlayers//2):
-            layers.append(erosionlayer)
-            layers.append(dilationlayer)
-            erosionlayer = ndimage.binary_erosion(erosionlayer)
-            dilationlayer = ndimage.binary_dilation(dilationlayer)
-        blendmap = sum(layers)/offlayers
+        heightmap = (waterdist/waterdist.max()*heightnoisemap)
+        heightmap = ndimage.gaussian_filter(heightmap,1)
+        heightmap = heightmap ** 1.5
+        heightmap /= heightmap.max()
 
-        # heightoffset = 0.5#(heightmap.max() - heightmap.min())/2
-        heightmap = offlayers*(rawheightmap+blendmap)/2-offlayers/2
-        print("Blended heightmap with landmap")
-        # layerdheightmap = np.rint(heightmap)
+        # divide into layers
+        nlayers = 6
+        heightmap = np.rint((nlayers-1)*heightmap)+1
+        heightmap *= landmap
         print("Generated height layers")
         
         # place rivers
@@ -120,9 +131,8 @@ class WorldGenerator:
         print("Upscaling...")
         # zoom in to full scale
         landmap = self._upscale2dwithnoise(landmap,n=2,noisefactor=0.4,iter=3,clip=(0,1))
-        heightmap = self._upscale2dwithnoise(heightmap,n=2,iter=3)
+        heightmap = self._upscale2dother(heightmap,n=2**3)#self._upscale2dwithnoise(heightmap,n=2,iter=3)
         biomemap = self._upscale2dother(biomemap,n=2**3)
-        plt.show()
 
         # split into smaller cells
         ncellsw = WORLDSIZEW//CELLSIZEW
@@ -268,7 +278,7 @@ class WorldGenerator:
                     # weighted drunk walk
                     riverlen = 0
                     lastdirection = (0,0)
-                    while(  tmpheightmap[c,r] > -1
+                    while(  tmpheightmap[c,r] > 0
                             and riverlen < 1000
                             and (c >= gradius and c <= w-gradius and r >= gradius and r <= h-gradius)):
                         # fetch local gradient

@@ -1,5 +1,5 @@
 import src.core as core
-
+import tkinter as tk
 DEBUGMODE = False
 
 def main():

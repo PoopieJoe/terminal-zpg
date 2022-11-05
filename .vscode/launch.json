@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "zpg.py", //current file: ${file}
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": false
         }
     ]
 }
