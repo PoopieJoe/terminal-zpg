@@ -71,8 +71,8 @@ class Controller:
     ):
         ns2s = lambda t : t/1000000000
         ns2ms = lambda t : t/1000000
-        
-        print("[{:.2f}] Time since last update: {:.2f}ms".format(ns2s(t_ns),ns2ms(t_ns)))
+
+        print("[{:.2f}] Time since last update: {:.2f}ms".format(ns2s(t_ns),ns2ms(dt_ns)))
         # for entity in self.entities:
         #     entity.update()
         return
