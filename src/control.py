@@ -40,11 +40,6 @@ class Controller:
             outputobj = {}
             for key in SAVEKEYS:
                 outputobj[key] = self.__dict__[key]
-            # outputobj = {
-            #     "name" : self.name,
-            #     "worlds" : self.worlds,
-            #     "entities" : self.entities
-            # }
             saveload.saveToJSON(outputobj,filename=self.name)
         print("Done")
         return
@@ -70,10 +65,17 @@ class Controller:
         self.entities.append(Entity(_id,type,pos,entity,updatef))
     
     def update( # run one update for all applicable characters and tiles
-        self
+        self,
+        t_ns, # time since start of world in ns
+        dt_ns # time since last update in ns
     ):
-        for entity in self.entities:
-            entity.update()
+        ns2s = lambda t : t/1000000000
+        ns2ms = lambda t : t/1000000
+        
+        print("[{:.2f}] Time since last update: {:.2f}ms".format(ns2s(t_ns),ns2ms(t_ns)))
+        # for entity in self.entities:
+        #     entity.update()
+        return
 
 class Entity:
     def __init__(

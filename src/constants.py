@@ -212,3 +212,5 @@ SAVEFOLDER = "./world/"
 SAVEFORMAT = "json"
 
 SAVEKEYS = ("name","seed","worlds","entities")
+
+UPDATERATE = 1 # interval in Hz at which the game runs one timestep

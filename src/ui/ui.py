@@ -1,4 +1,6 @@
 import tkinter as tk
+import time
+import copy
 import src.control as control
 import src.ui.widgets as widgets
 from src.constants import *
@@ -19,7 +21,20 @@ class GUI(tk.Tk):
         # self.geometry(str(SCREENW) +"x" + str(SCREENH))
         self.config(bg="magenta")
         self.createFrames()
+
+        self.tnsSinceEpoch = time.time_ns()
+        self.t_ns = 0
+        self.tick()
         return
+
+    def tick(
+        self
+    ):
+        dt = time.time_ns() - self.tnsSinceEpoch
+        self.tnsSinceEpoch += dt
+        self.t_ns += dt
+        self.controller.update(self.t_ns,dt)
+        self.after(UPDATERATE*1000,self.tick)
 
     def createFrames(self):
         """Create the frames for the ui."""             
