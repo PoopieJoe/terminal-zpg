@@ -213,4 +213,4 @@ SAVEFORMAT = "json"
 
 SAVEKEYS = ("name","seed","worlds","entities")
 
-UPDATERATE = 1 # interval in Hz at which the game runs one timestep
+TICKRATE = 1 # frequency in Hz at which the game runs one timestep

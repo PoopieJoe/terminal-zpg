@@ -18,7 +18,6 @@ class GUI(tk.Tk):
         self.title("ZPG-RPG")
         self.minsize(480, 360)  # width, height
         self.maxsize(SCREENW, SCREENH)  # width, height
-        # self.geometry(str(SCREENW) +"x" + str(SCREENH))
         self.config(bg="magenta")
         self.createFrames()
 
@@ -34,7 +33,7 @@ class GUI(tk.Tk):
         self.tnsSinceEpoch += dt
         self.t_ns += dt
         self.controller.update(self.t_ns,dt)
-        self.after(UPDATERATE*1000,self.tick)
+        self.after(1000/TICKRATE,self.tick)
 
     def createFrames(self):
         """Create the frames for the ui."""             
@@ -53,6 +52,10 @@ class GUI(tk.Tk):
 
     def showFrame(self, frameclass):
         self.frames[frameclass].tkraise()
+
+    def exit(self):
+        print("Quitting...")
+        self.quit()
 
 class BaseFrame(tk.Frame):
     """Container for a (sub)menu"""
@@ -76,7 +79,7 @@ class FrameHome(BaseFrame):
         self.top_bar = tk.Frame(self,width=SCREENW-20,height=SCREENH-20)
         self.top_bar.grid(row=0,column=0,padx=5,pady=5)
 
-        self.quit_button = tk.Button(self.top_bar,text="Quit", command=self.quit)
+        self.quit_button = tk.Button(self.top_bar,text="Quit", command=self.frameController.exit)
         self.quit_button.grid(row=0,column=2)
 
         self.map_button = tk.Button(self.top_bar,text="Switch to map view",command=lambda: self.frameController.showFrame(FrameWorld))
