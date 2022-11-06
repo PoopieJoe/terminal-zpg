@@ -136,12 +136,12 @@ class FrameHome(BaseFrame):
 class FrameWorld(BaseFrame):
     """Shows worldgen map"""
     def createWidgets(self):
-        world = self.frameController.controller.world
+        world = self.frameController.controller.worlds[0]
         self.map = widgets.MapRenderer(self,world,(0,0))
         self.map.grid(row=0,column=1)
 
-        self.return_button = tk.Button(self,text="Switch to main view",command=lambda: self.frameController.showFrame(FrameHome))
-        self.return_button.grid(row=0,column=0)
+        self.main_menu_button = tk.Button(self,text="Switch to main view",command=lambda: self.frameController.showFrame(FrameHome))
+        self.main_menu_button.grid(row=0,column=0)
         return
 
 

@@ -206,3 +206,9 @@ WORLDGENTILESBLACKLIST = [
     WORLDTILETYPES.MOUNTAINPEAK
 ]
 WORLDGENERATORTILES = [tt for tt in WORLDTILETYPES.getlist() if tt not in WORLDGENTILESBLACKLIST]
+
+# save files
+SAVEFOLDER = "./world/"
+SAVEFORMAT = "json"
+
+SAVEKEYS = ("name","seed","worlds","entities")

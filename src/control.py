@@ -1,21 +1,59 @@
-from numpy import identity
+import time
+import os
 import src.character as char
 import src.world as world
+import src.saveload as saveload
+from src.constants import *
 
 class Controller:
     def __init__(
         self
     ):
-        self.world = world.World()
-
-        pc = char.Character()
-        pc.generate()
-
+        self.worlds = []
         self.entities = []
 
-        # place character in world
-        self.addEntity("PC",(0,0),pc)
+        self.name = input("Give world name: ")
+
+        # check if file exists already in SAVEFOLDER
+        if os.path.exists(saveload.savefilePath(self.name)):
+            print("World found! Loading from file...")
+            inputobj = saveload.loadFromJSON(filename=self.name)
+            for key in SAVEKEYS:
+                self.__dict__[key] = inputobj[key]
+        else:
+            print("World not found, creating new...")
+            self.seed = input("Give world seed [<Enter> to use world name]: ")
+            if self.seed == "":
+                self.seed = self.name
+
+            print("Generating Overworld...")
+            overworld = world.World("overworld",self.seed)
+            overworld.generate()
+            self.addWorld(overworld)
+
+            print("Generating character...")
+            pc = char.Character()
+            pc.generate()
+            self.addEntity("PC",(0,0),pc)
+
+            print("Saving to file...")
+            outputobj = {}
+            for key in SAVEKEYS:
+                outputobj[key] = self.__dict__[key]
+            # outputobj = {
+            #     "name" : self.name,
+            #     "worlds" : self.worlds,
+            #     "entities" : self.entities
+            # }
+            saveload.saveToJSON(outputobj,filename=self.name)
+        print("Done")
         return
+
+    def addWorld(
+        self,
+        world:world.World
+    ):
+        self.worlds.append(world)
 
     def addEntity(
         self,

@@ -128,11 +128,12 @@ class WorldGenerator:
                         biomemap[c,r] = WORLDTILETYPES.JUNGLE
         print("Generated biomes")
 
-        print("Upscaling...")
         # zoom in to full scale
         landmap = self._upscale2dwithnoise(landmap,n=2,noisefactor=0.4,iter=3,clip=(0,1))
         heightmap = self._upscale2dother(heightmap,n=2**3)#self._upscale2dwithnoise(heightmap,n=2,iter=3)
         biomemap = self._upscale2dother(biomemap,n=2**3)
+
+        print("Upscaled map to full size")
 
         # split into smaller cells
         ncellsw = WORLDSIZEW//CELLSIZEW
@@ -152,7 +153,6 @@ class WorldGenerator:
                                                 heightmap[toplefttilex:toplefttilex+CELLSIZEW-1,toplefttiley:toplefttiley+CELLSIZEH-1],
                                                 biomemap[toplefttilex:toplefttilex+CELLSIZEW-1,toplefttiley:toplefttiley+CELLSIZEH-1])
                 cells.append(newcell)
-        print("Done")
         return cells
 
     def _genLandmap(

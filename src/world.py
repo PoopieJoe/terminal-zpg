@@ -8,15 +8,20 @@ import src.worldgen as worldgen
 from src.constants import *    
 class World:
     def __init__(
-        self
+        self,
+        name,
+        seed = 0
     ):
-        seed = input("Give world seed: ")
+        self.name = name
         self.generator = worldgen.WorldGenerator(seed)
-        print("Generating world...")
-        self.cells = self.generator.genMap()
+        self.cells = []
         return
 
-    # Solution: keep list of cells with coord members, is robust for negative coordinates and dynamic cell generation
+    def generate(
+        self,
+    ):
+        self.cells = self.generator.genMap()
+        return
 
     def findCell(
         self,
