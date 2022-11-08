@@ -166,6 +166,8 @@ STATMODS = StatModifiers(attrobj=ATTRIBUTES,statsobj=STATS)
 
 
     # World
+
+OVERWORLDNAME = "Overworld"
 class WindDirections(CONSTANTOBJECT):
     def __init__(self):
         super().__init__()
@@ -206,11 +208,10 @@ WORLDGENTILESBLACKLIST = [
     WORLDTILETYPES.MOUNTAINPEAK
 ]
 WORLDGENERATORTILES = [tt for tt in WORLDTILETYPES.getlist() if tt not in WORLDGENTILESBLACKLIST]
-
 # save files
 SAVEFOLDER = "./world/"
 SAVEFORMAT = "json"
 
-SAVEKEYS = ("name","seed","worlds","entities")
+SAVEKEYS = ("name","seed","t_ns","worlds","entities")
 
 TICKRATE = 1 # frequency in Hz at which the game runs one timestep

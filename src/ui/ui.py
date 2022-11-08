@@ -31,9 +31,8 @@ class GUI(tk.Tk):
     ):
         dt = time.time_ns() - self.tnsSinceEpoch
         self.tnsSinceEpoch += dt
-        self.t_ns += dt
-        self.controller.update(self.t_ns,dt)
-        self.after(1000/TICKRATE,self.tick)
+        self.controller.update(dt)
+        self.after(int(1000/TICKRATE),self.tick)
 
     def createFrames(self):
         """Create the frames for the ui."""             
@@ -53,9 +52,15 @@ class GUI(tk.Tk):
     def showFrame(self, frameclass):
         self.frames[frameclass].tkraise()
 
-    def exit(self):
-        print("Quitting...")
+    def exit(self,save=False):
+        self.destroy()
+        if save:
+            print("Saving and quitting...")
+            self.controller.exportCurrentGame()
+        else:
+            print("Quitting...")
         self.quit()
+        
 
 class BaseFrame(tk.Frame):
     """Container for a (sub)menu"""
@@ -79,7 +84,7 @@ class FrameHome(BaseFrame):
         self.top_bar = tk.Frame(self,width=SCREENW-20,height=SCREENH-20)
         self.top_bar.grid(row=0,column=0,padx=5,pady=5)
 
-        self.quit_button = tk.Button(self.top_bar,text="Quit", command=self.frameController.exit)
+        self.quit_button = tk.Button(self.top_bar,text="Save and quit", command=lambda: self.frameController.exit(save=True))
         self.quit_button.grid(row=0,column=2)
 
         self.map_button = tk.Button(self.top_bar,text="Switch to map view",command=lambda: self.frameController.showFrame(FrameWorld))
@@ -154,7 +159,7 @@ class FrameHome(BaseFrame):
 class FrameWorld(BaseFrame):
     """Shows worldgen map"""
     def createWidgets(self):
-        world = self.frameController.controller.worlds[0]
+        world = self.frameController.controller.worlds[OVERWORLDNAME]
         self.map = widgets.MapRenderer(self,world,(0,0))
         self.map.grid(row=0,column=1)
 

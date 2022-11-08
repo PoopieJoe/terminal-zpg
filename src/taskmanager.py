@@ -1,12 +1,17 @@
 class Task:
     def __init__(
         self,
-        supertask = None
+        name,
+        supertask = None,
+        subtasks = {},
+        description = None
     ):
+        self.name = name
+        self.description = description
         self.supertask = supertask
         if self.supertask != None:
             self.supertask.addsubtask(self)
-        self.subtasks = {}
+        self.subtasks = subtasks
         return
 
     def addsubtask(
@@ -19,15 +24,15 @@ class Task:
 class Activity:
     def __init__(
         self,
-        task:Task,
         type:str,
         prerequisite,
+        task:Task = None,
         **p
     ):
         self.__dict__.update(p)
         self.task = task
+        if task != None:
+            self.task.addsubtask(self)
         self.type = type
         self.prerequisite = prerequisite
-
-        self.task.addsubtask(self)
         return

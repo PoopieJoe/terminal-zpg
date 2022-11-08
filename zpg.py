@@ -1,3 +1,4 @@
+import sys
 import src.core as core
 import tkinter as tk
 DEBUGMODE = False
@@ -5,8 +6,6 @@ DEBUGMODE = False
 def main():
     game = core.Core()
     game.launch()
-    exit()
-
 
 if __name__ == "__main__":
     if DEBUGMODE:
@@ -14,3 +13,4 @@ if __name__ == "__main__":
         cProfile.run('main()','zpg.prof')
     else:
         main()
+    sys.exit()
