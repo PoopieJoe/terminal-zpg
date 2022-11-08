@@ -163,7 +163,7 @@ class FrameHome(BaseFrame):
 class FrameWorld(BaseFrame):
     """Shows worldgen map"""
     def createWidgets(self):
-        world = self.frameController.controller.worlds[OVERWORLDNAME]
+        world = self.frameController.controller.worlds[0]
         self.map = widgets.MapRenderer(self,world,(0,0))
         self.map.grid(row=0,column=1)
 

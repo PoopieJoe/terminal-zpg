@@ -1,6 +1,6 @@
 import time
 import os
-import src.character as char
+import src.entities as ent
 import src.world as world
 import src.saveload as saveload
 import src.taskmanager as tsk
@@ -10,8 +10,8 @@ class Controller:
     def __init__(
         self
     ):
-        self.worlds = {}
-        self.entities = {}
+        self.worlds = []
+        self.entities = []
 
         self.name = input("Give world name: ")
 
@@ -28,12 +28,12 @@ class Controller:
             print("Generating Overworld...")
             overworld = world.World(OVERWORLDNAME,self.seed)
             overworld.generate()
-            self.addWorld({overworld.name:overworld})
+            self.addWorld(overworld)
 
             print("Generating character...")
-            pc = char.Character()
+            
+            pc = self.addEntity(ent.PlayerCharacter,(0,0))
             pc.generate()
-            self.addEntity("PC",(0,0),pc)
 
             act = tsk.Activity("Walk","something",destination = "should be an entity or tile coordinate")
             task = tsk.Task("Go to place",subtasks={act},description = "Testdescr")
@@ -71,23 +71,21 @@ class Controller:
         self,
         world:world.World
     ):
-        self.worlds.update(world)
+        self.worlds.append(world)
 
     def addEntity(
         self,
-        type,
-        pos,
-        entity,
-        updatef = None
+        _c,
+        pos
     ):
         _id = 0
         while ( _id in [e.id for e in self.entities] 
                 and self.entities != []):
             _id = _id + 1
-        print("Added entity: " + str(type) + " at " + str(pos))
-        newentity = Entity(_id,type,pos,entity,updatef)
-        self.entities.update({_id:newentity})
-        return _id
+        print("Added entity: " + str(_c) + " at " + str(pos))
+        newentity = _c(_id,pos)
+        self.entities.append(newentity)
+        return newentity
 
     def giveTask(
         self,
@@ -95,9 +93,9 @@ class Controller:
         task,
         supertask = None
     ):
-        if entity in self.entities.values():
-            entity.object.addTask(task,supertask)
-            print("Added task <" + task.name + "> to entity <" + entity.id + ">")
+        if entity in self.entities:
+            entity.addTask(task,supertask)
+            print("Added task <" + task.name + "> to entity <" + str(entity.id) + ">")
         else:
             print("Failed to add task <" + task.name + "> to entity <id=" + entity + ">. Entity does not exist.")
             return False
@@ -112,28 +110,6 @@ class Controller:
         
 
         print("[{:06.2f}] Time since last update: {:07.2f}ms".format(ns2s(self.t_ns),ns2ms(dt_ns)))
-        # for entity in self.entities:
-        #     entity.update()
+        for entity in self.entities:
+            entity.update()
         return
-
-class Entity:
-    def __init__(
-        self,
-        type,
-        id,
-        pos,
-        object,
-        updatef = None
-    ):
-        self.id = id
-        self.type = type
-        self.pos = pos
-        self.object = object
-        self._updatef = updatef
-    
-    def update(
-        self,
-        *arg,
-        **kwargs
-    ):
-        return self._updatef(*arg,**kwargs)

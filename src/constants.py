@@ -19,6 +19,14 @@ SCREENH = 900
 
 # Gameplay
     # Character
+        # States
+class PlayerCharacterStates(CONSTANTOBJECT):
+    def __init__(self):
+        super().__init__()
+        self.IDLE = "Idle"
+        self.DOINGTASK = "Doing task"
+PCSTATES = PlayerCharacterStates()
+
         # Traits
 class Classes(CONSTANTOBJECT):
     def __init__(self):
@@ -209,9 +217,9 @@ WORLDGENTILESBLACKLIST = [
 ]
 WORLDGENERATORTILES = [tt for tt in WORLDTILETYPES.getlist() if tt not in WORLDGENTILESBLACKLIST]
 # save files
-SAVEFOLDER = "./world/"
+SAVEFOLDER = "./worlds/"
 SAVEFORMAT = "json"
 
 SAVEKEYS = ("name","seed","t_ns","worlds","entities")
 
-TICKRATE = 1 # frequency in Hz at which the game runs one timestep
+TICKRATE = 50 # frequency in Hz at which the game runs one timestep

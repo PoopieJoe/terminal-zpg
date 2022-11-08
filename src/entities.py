@@ -3,10 +3,44 @@ from src.constants import *
 import src.taskmanager as tsk
 from numpy import dot
 
-class Character:
+class Entity:
     def __init__(
         self,
+        id,
+        pos
     ):
+        self.id = id
+        self.pos = pos
+        self.vel = 0
+    
+    def update(
+        self,
+        **p
+    ):
+        raise NotImplementedError
+
+class PlayerCharacter(Entity):
+    def __init__(
+        self,
+        id,
+        pos
+    ):
+        Entity.__init__(self,id,pos)
+        self._state = PCSTATES.IDLE
+        return
+
+    def addTask(
+        self,
+        task:tsk.Task,
+        supertask:tsk.Task = None
+    ):
+        if supertask != None:
+            supertask.addsubtask(task)
+        else:
+            self.tasks.update({task.name:task})
+
+    def update(self, **p):
+
         return
 
     def generate(
@@ -32,6 +66,8 @@ class Character:
 
         self.tasks = {}
 
+
+        #statstuff
         self.power = power
         self.finesse = finesse
         self.reasoning = reasoning
@@ -63,13 +99,3 @@ class Character:
         self.stealth        = BASESTATS.STEALTH         + level*LEVELBONUS.STEALTH          + dot(attributearr,STATMODS.getRow(STATS.STEALTH))
         self.speed          = BASESTATS.SPEED           + level*LEVELBONUS.SPEED            + dot(attributearr,STATMODS.getRow(STATS.SPEED))
         return
-
-    def addTask(
-        self,
-        task:tsk.Task,
-        supertask:tsk.Task = None
-    ):
-        if supertask != None:
-            supertask.addsubtask(task)
-        else:
-            self.tasks.update({task.name:task})
