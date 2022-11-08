@@ -20,7 +20,7 @@ class GUI(tk.Tk):
         self.maxsize(SCREENW, SCREENH)  # width, height
         self.config(bg="magenta")
         self.createFrames()
-        
+
         #set window in focus
         self.focus_set()
         self.focus_force()
@@ -35,7 +35,7 @@ class GUI(tk.Tk):
         dt = time.time_ns() - _tnsSinceEpoch
         _tnsSinceEpoch += dt
         self.controller.update(dt)
-        self.after(int(1000/TICKRATE),self.tick,_tnsSinceEpoch)
+        self.nextaftercall = self.after(int(1000/TICKRATE),self.tick,_tnsSinceEpoch)
 
     def createFrames(self):
         """Create the frames for the ui."""             
@@ -56,6 +56,7 @@ class GUI(tk.Tk):
         self.frames[frameclass].tkraise()
 
     def exit(self,save=False):
+        self.after_cancel(self.nextaftercall)
         self.destroy()
         if save:
             print("Saving and quitting...")
