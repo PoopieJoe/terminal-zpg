@@ -2,6 +2,7 @@ class Task:
     def __init__(
         self,
         name,
+        entity = None,
         supertask = None,
         subtasks = {},
         description = None
@@ -10,7 +11,10 @@ class Task:
         self.description = description
         self.supertask = supertask
         if self.supertask != None:
+            self.entity = supertask.entity
             self.supertask.addsubtask(self)
+        else:
+            self.entity = entity
         self.subtasks = subtasks
         return
 
@@ -18,6 +22,7 @@ class Task:
         self,
         activity
     ):
+        activity.entity = self.entity # override child entity
         self.subtasks.update(activity)
         return
 
