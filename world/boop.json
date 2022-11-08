@@ -1,7 +1,7 @@
 {
     "name": "boop",
     "seed": "boop",
-    "t_ns": 77626548300,
+    "t_ns": 17105111300,
     "worlds": {
         "Overworld": {
             "py/object": "src.world.World",

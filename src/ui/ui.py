@@ -20,19 +20,22 @@ class GUI(tk.Tk):
         self.maxsize(SCREENW, SCREENH)  # width, height
         self.config(bg="magenta")
         self.createFrames()
-
-        self.tnsSinceEpoch = time.time_ns()
-        self.t_ns = 0
-        self.tick()
+        
+        #set window in focus
+        self.focus_set()
+        self.focus_force()
+    
+        self.tick(time.time_ns())
         return
 
     def tick(
-        self
+        self,
+        _tnsSinceEpoch
     ):
-        dt = time.time_ns() - self.tnsSinceEpoch
-        self.tnsSinceEpoch += dt
+        dt = time.time_ns() - _tnsSinceEpoch
+        _tnsSinceEpoch += dt
         self.controller.update(dt)
-        self.after(int(1000/TICKRATE),self.tick)
+        self.after(int(1000/TICKRATE),self.tick,_tnsSinceEpoch)
 
     def createFrames(self):
         """Create the frames for the ui."""             
