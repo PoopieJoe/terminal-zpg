@@ -58,27 +58,27 @@ BIOMECOLORMAP = {
     WORLDTILETYPES.MOUNTAIN: "#F4A460",
 }
 
-def _numpy2ppm(canvas:tk.Canvas,image: np.ndarray,export=None):
-    """Convert np array to PPM formatted image\n
-        image: N-dimensional array of shape (width,height) for greyscale OR (width,height,3) for RGB-255"""
-    if len(image.shape) == 3:
-        height, width, depth = image.shape
-        if depth > 3:
-            raise ValueError("Too many color channels, only RGB allowed")
-    elif len(image.shape) == 2:
-        height, width = image.shape
-        newimage = np.empty((height,width,3))
-        newimage[:,:,0] = image
-        newimage[:,:,1] = image
-        newimage[:,:,2] = image
-        image = newimage
-    else:
-        raise ValueError("Image shape must be (wxh) or (wxhxd)")
+# def _numpy2ppm(canvas:tk.Canvas,image: np.ndarray,export=None):
+#     """Convert np array to PPM formatted image\n
+#         image: N-dimensional array of shape (width,height) for greyscale OR (width,height,3) for RGB-255"""
+#     if len(image.shape) == 3:
+#         height, width, depth = image.shape
+#         if depth > 3:
+#             raise ValueError("Too many color channels, only RGB allowed")
+#     elif len(image.shape) == 2:
+#         height, width = image.shape
+#         newimage = np.empty((height,width,3))
+#         newimage[:,:,0] = image
+#         newimage[:,:,1] = image
+#         newimage[:,:,2] = image
+#         image = newimage
+#     else:
+#         raise ValueError("Image shape must be (wxh) or (wxhxd)")
 
-    data = f'P6 {width} {height} 255\n'.encode() + image.astype(np.uint8).tobytes()
-    if export != None:
-        with open(export, 'wb') as file:
-            file.write(data)
-            newimage.tofile(file)
-            print("Exported to image: "+export)
-    return tk.PhotoImage(master=canvas,data=data, format='ppm')
+#     data = f'P6 {width} {height} 255\n'.encode() + image.astype(np.uint8).tobytes()
+#     if export != None:
+#         with open(export, 'wb') as file:
+#             file.write(data)
+#             newimage.tofile(file)
+#             print("Exported to image: "+export)
+#     return tk.PhotoImage(master=canvas,data=data, format='ppm')

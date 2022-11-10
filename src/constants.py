@@ -220,6 +220,10 @@ WORLDGENERATORTILES = [tt for tt in WORLDTILETYPES.getlist() if tt not in WORLDG
 SAVEFOLDER = "./worlds/"
 SAVEFORMAT = "json"
 
-SAVEKEYS = ("name","seed","t_ns","worlds","entities")
+SAVEKEYS = ("name","seed","t_ns","worlds","entities","pc")
 
-TICKRATE = 50 # frequency in Hz at which the game runs one timestep
+TICKRATE = 100 # frequency in Hz at which the game runs one timestep
+
+LOGEVENTS = True
+LOGSFOLDER = "./logs/"
+EVTLOGFILE = LOGSFOLDER+"evtlogfile.txt"

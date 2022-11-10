@@ -3,6 +3,7 @@ import time
 import copy
 import src.control as control
 import src.ui.widgets as widgets
+import src.ui.events as events
 from src.constants import *
 
 class GUI(tk.Tk):
@@ -41,6 +42,7 @@ class GUI(tk.Tk):
         """Create the frames for the ui."""             
         #   Frame Container
         self.rootcontainer = tk.Frame(self,width=SCREENW,height=SCREENH)
+        self.bindEvents()
         self.rootcontainer.grid(row=0, column=0, sticky=tk.W+tk.E)
 
         #   Frames
@@ -64,6 +66,19 @@ class GUI(tk.Tk):
         else:
             print("Quitting...")
         self.quit()
+
+    def bindEvents(
+        self
+    ):  
+        self.bind("<KeyPress-Up>",events.onUpArrowPress)
+        self.bind("<KeyRelease-Up>",events.onUpArrowRelease)
+        self.bind("<KeyPress-Down>",events.onDownArrowPress)
+        self.bind("<KeyRelease-Down>",events.onDownArrowRelease)
+        self.bind("<KeyPress-Left>",events.onLeftArrowPress)
+        self.bind("<KeyRelease-Left>",events.onLeftArrowRelease)
+        self.bind("<KeyPress-Right>",events.onRightArrowPress)
+        self.bind("<KeyRelease-Right>",events.onRightArrowRelease)
+        return
         
 
 class BaseFrame(tk.Frame):
@@ -170,5 +185,3 @@ class FrameWorld(BaseFrame):
         self.main_menu_button = tk.Button(self,text="Switch to main view",command=lambda: self.frameController.showFrame(FrameHome))
         self.main_menu_button.grid(row=0,column=0)
         return
-
-

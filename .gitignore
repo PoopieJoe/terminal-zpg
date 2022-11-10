@@ -114,5 +114,7 @@ dmypy.json
 .pyre/
 
 # Other
+.prof
 designstuff
 worlds/*
+logs/*

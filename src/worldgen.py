@@ -2,7 +2,7 @@ import random
 from collections import Counter
 import numpy as np
 import copy
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from scipy import ndimage
 import src.noise as noise
 import src.cell as cell
@@ -44,7 +44,6 @@ class WorldGenerator:
         landmap = self._genLandmap(w,h)
         w,h=landmap.shape
 
-        printmap(landmap,"landmap")
         print("Generated landmap")
 
         # heightmap
@@ -337,15 +336,15 @@ BIOMESPREADMAP = {
     WORLDTILETYPES.MOUNTAIN:    (0.3,0.6),
 }
 
-def printmap(
-    arr:np.ndarray,
-    title=""
-):
-    # print('\n'.join('  '.join("{:} ".format(int(x)) for x in row) for row in arr.tolist()))
-    plt.figure()
-    plt.title(title)
-    plt.imshow(arr.T,interpolation="none",origin='lower')
-    return
+# def printmap(
+#     arr:np.ndarray,
+#     title=""
+# ):
+#     # print('\n'.join('  '.join("{:} ".format(int(x)) for x in row) for row in arr.tolist()))
+#     plt.figure()
+#     plt.title(title)
+#     plt.imshow(arr.T,interpolation="none",origin='lower')
+#     return
 
 def gaussKern(l=5, sig=1.):
     """\

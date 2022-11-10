@@ -32,8 +32,8 @@ class Controller:
 
             print("Generating character...")
             
-            pc = self.addEntity(ent.PlayerCharacter,(0,0))
-            pc.generate()
+            self.pc = self.addEntity(ent.PlayerCharacter,[0,0])
+            self.pc.generate()
 
             act = tsk.Activity("Walk","something",destination = "should be an entity or tile coordinate")
             task = tsk.Task("Go to place",subtasks={act},description = "Testdescr")
@@ -44,10 +44,6 @@ class Controller:
             print("Saving to file...")
             self.exportCurrentGame()
         print("Done")
-
-        # create task and activities
-
-
         return
 
     def exportCurrentGame(
@@ -83,7 +79,7 @@ class Controller:
                 and self.entities != []):
             _id = _id + 1
         print("Added entity: " + str(_c) + " at " + str(pos))
-        newentity = _c(_id,pos)
+        newentity = _c(self,_id,pos)
         self.entities.append(newentity)
         return newentity
 
@@ -108,8 +104,9 @@ class Controller:
         ns2s = lambda t : t/1000000000
         ns2ms = lambda t : t/1000000
         
+        os.system('cls' if os.name == 'nt' else 'clear') # clear terminal each update
 
         print("[{:06.2f}] Time since last update: {:07.2f}ms".format(ns2s(self.t_ns),ns2ms(dt_ns)))
         for entity in self.entities:
-            entity.update()
+            entity.update(dt=ns2s(dt_ns))
         return
