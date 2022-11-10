@@ -3,7 +3,7 @@ import time
 import copy
 import src.control as control
 import src.ui.widgets as widgets
-import src.ui.events as events
+import src.events as events
 from src.constants import *
 
 class GUI(tk.Tk):
@@ -48,7 +48,7 @@ class GUI(tk.Tk):
         #   Frames
         self.frames = {}
         for f in (FrameHome,FrameWorld): # defined subclasses of BaseFrame
-            frame = f(frameController=self, master=self.rootcontainer)
+            frame = f(gui=self, master=self.rootcontainer)
             frame.grid(row=0, column=0, sticky=tk.NW+tk.SE)
             frame.config(bg="black")
             self.frames[f] = frame
@@ -85,11 +85,11 @@ class BaseFrame(tk.Frame):
     """Container for a (sub)menu"""
     def __init__(
         self,
-        frameController:GUI,
+        gui:GUI,
         master
     ):
         tk.Frame.__init__(self, master,width=SCREENW,height=SCREENH)
-        self.frameController = frameController
+        self.gui = gui
         self.grid()
         self.createWidgets()
         
@@ -103,10 +103,10 @@ class FrameHome(BaseFrame):
         self.top_bar = tk.Frame(self,width=SCREENW-20,height=SCREENH-20)
         self.top_bar.grid(row=0,column=0,padx=5,pady=5)
 
-        self.quit_button = tk.Button(self.top_bar,text="Save and quit", command=lambda: self.frameController.exit(save=True))
+        self.quit_button = tk.Button(self.top_bar,text="Save and quit", command=lambda: self.gui.exit(save=True))
         self.quit_button.grid(row=0,column=2)
 
-        self.map_button = tk.Button(self.top_bar,text="Switch to map view",command=lambda: self.frameController.showFrame(FrameWorld))
+        self.map_button = tk.Button(self.top_bar,text="Switch to map view",command=lambda: self.gui.showFrame(FrameWorld))
         self.map_button.grid(row=0,column=1)
 
         self.title_label = tk.Label(self.top_bar,text="Title")
@@ -178,10 +178,12 @@ class FrameHome(BaseFrame):
 class FrameWorld(BaseFrame):
     """Shows worldgen map"""
     def createWidgets(self):
-        world = self.frameController.controller.worlds[0]
-        self.map = widgets.MapRenderer(self,world,(0,0))
+        getPCPos = lambda : self.gui.controller.pc.pos
+
+        world = self.gui.controller.worlds[0]
+        self.map = widgets.MapRenderer(self,world,getPCPos())
         self.map.grid(row=0,column=1)
 
-        self.main_menu_button = tk.Button(self,text="Switch to main view",command=lambda: self.frameController.showFrame(FrameHome))
+        self.main_menu_button = tk.Button(self,text="Switch to main view",command=lambda: self.gui.showFrame(FrameHome))
         self.main_menu_button.grid(row=0,column=0)
         return

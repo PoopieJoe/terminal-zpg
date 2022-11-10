@@ -9,42 +9,38 @@ from PIL import Image,ImageTk
 import src.world as world
 from src.constants import *
 
-class MapRenderer(tk.Label):
+class MapRenderer(tk.Canvas):
     def __init__(
         self,
         master,
         map:world.World,
         coords:tuple
     ):
-        
-        tk.Label.__init__(self,master=master,text="hoi")
-        framew = SCREENW
-        frameh = SCREENH    
-        framesize = min(frameh,framew) # take minimum to be square
+        tk.Canvas.__init__(self,master=master,width=600,height=600)
         renderareasize = 3      # render area size in chunks (3x3)
-        
-        tilesize = (math.floor(framesize/(renderareasize*CELLSIZEW)),math.floor(framesize/(renderareasize*CELLSIZEH)))            # size of a tile in px
-        width = renderareasize*CELLSIZEW*tilesize[0]
-        height = renderareasize*CELLSIZEH*tilesize[1]
-
-        # load relevant chunks (3x3 centered around character)
-        radius = math.floor(renderareasize/2)
+        radius = math.floor(renderareasize/2) # load relevant chunks
         charcellcoord,tileoffset = map.coords2cellOffset(coords)   # chunk of character
-        # charcell = map.findCell((coords[0]-radius,coords[1]+radius))
-        # topleftcoord = charcell.topleft #this coordinate is mapped to 0,0 on the canvas
 
         loadedmap = np.zeros((CELLSIZEW*(2*radius+1),CELLSIZEH*(2*radius+1)))
-        for celloffsetx in range(charcellcoord[0]-radius,charcellcoord[0]+radius+1):
-            for celloffsety in range(charcellcoord[1]-radius,charcellcoord[1]+radius+1):
+        for celloffsetx in range(int(charcellcoord[0]-radius),int(charcellcoord[0]+radius+1)):
+            for celloffsety in range(int(charcellcoord[1]-radius),int(charcellcoord[1]+radius+1)):
                 land = map.findCell((celloffsetx,celloffsety)).heightmap
 
                 loadedmap[CELLSIZEW*(celloffsetx+radius):CELLSIZEW*(celloffsetx+radius+1)-1,
                             CELLSIZEH*(celloffsety+radius):CELLSIZEH*(celloffsety+radius+1)-1] = land
 
-        # fill canvas
-        self.img = ImageTk.PhotoImage(Image.fromarray(loadedmap/loadedmap.max()*255),master=self)#_numpy2ppm(self,loadedmap/loadedmap.max()*255,"example.ppm")#
+        # image containing all chunks
+        self.img = Image.fromarray(loadedmap/loadedmap.max()*255)#_numpy2ppm(self,loadedmap/loadedmap.max()*255,"example.ppm")#
+
+        # fetch rendered rectangle
+        rectsz = (600,600)
+        rectpos = (0,0)
+        rect = (rectpos[0],rectpos[1],rectpos[0]+rectsz[0],rectpos[1]+rectsz[1])
+
+        self.img = self.img.crop(rect)
+        self.pimg = ImageTk.PhotoImage(self.img,master=self)
+        self.create_image(0,0,anchor=tk.NW,image=self.pimg)
         
-        self.configure(image=self.img)
         return
 
         
