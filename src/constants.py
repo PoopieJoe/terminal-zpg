@@ -171,7 +171,17 @@ class StatModifiers(CONSTANTOBJECT):
         return self._modmatrix[row][:]
 STATMODS = StatModifiers(attrobj=ATTRIBUTES,statsobj=STATS)
 
-
+class ActivityTypes(CONSTANTOBJECT):
+    def __init__(self):
+        super().__init__()
+        self.GOTOCOORD = "Goto coord"
+ACTIVITYTYPES = ActivityTypes()
+class TaskModes(CONSTANTOBJECT):
+    def __init__(self):
+        super().__init__()
+        self.PARALLEL = "Parallel"
+        self.SERIES = "Series"
+TASKMODES = TaskModes()
 
     # World
 

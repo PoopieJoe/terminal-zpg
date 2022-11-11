@@ -1,7 +1,11 @@
 import json
-from src.constants import *
-import src.taskmanager as tsk
+
 from numpy import dot
+
+import src.events as events
+import src.taskmanager as tsk
+from src.constants import *
+
 
 class Entity:
     def __init__(
@@ -11,10 +15,18 @@ class Entity:
         pos
     ):
         self.controller = controller
+        self.taskmanager = tsk.TaskManager(self)
         self.id = id
         self.pos = pos
         self.vel = [0,0]
     
+    def addTask(
+        self,
+        task:tsk.Task,
+        supertask:tsk.Task = None
+    ):
+        self.taskmanager.addTask(task,supertask)
+
     def update(
         self,
         **p
@@ -32,16 +44,6 @@ class PlayerCharacter(Entity):
         self._state = PCSTATES.IDLE
         return
 
-    def addTask(
-        self,
-        task:tsk.Task,
-        supertask:tsk.Task = None
-    ):
-        if supertask != None:
-            supertask.addsubtask(task)
-        else:
-            self.tasks.update({task.name:task})
-
     def _print(
         self,
         s
@@ -53,7 +55,7 @@ class PlayerCharacter(Entity):
 
         # fsm
         if self._state == PCSTATES.IDLE:
-            self._print("Doing nothing ...")
+            self._print("Doing nothing...")
         else:
             pass
 
@@ -62,7 +64,8 @@ class PlayerCharacter(Entity):
         self.pos[0] += self.vel[0]*p["dt"]
         self.pos[1] += self.vel[1]*p["dt"]
 
-        # check if tasks completed
+        # check if tasks completed. generates completionevents
+        self.taskmanager.checkTaskCompletion()
         return
 
     def generate(

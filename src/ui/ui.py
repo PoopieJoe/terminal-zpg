@@ -70,6 +70,7 @@ class GUI(tk.Tk):
     def bindEvents(
         self
     ):  
+        #keybinds
         self.bind("<KeyPress-Up>",events.onUpArrowPress)
         self.bind("<KeyRelease-Up>",events.onUpArrowRelease)
         self.bind("<KeyPress-Down>",events.onDownArrowPress)

@@ -35,9 +35,11 @@ class Controller:
             self.pc = self.addEntity(ent.PlayerCharacter,[0,0])
             self.pc.generate()
 
-            act = tsk.Activity("Walk","something",destination = "should be an entity or tile coordinate")
-            task = tsk.Task("Go to place",subtasks={act},description = "Testdescr")
-            self.giveTask(self.entities[0],task)
+            task = tsk.Task(self.pc.taskmanager,"Go to place",description = "Testdescr")
+            act = tsk.GotoActivity(self.pc.taskmanager,task=task,destination = (10,10))
+            act1 = tsk.GotoActivity(self.pc.taskmanager,task=task,destination = (10,-10))
+            act2 = tsk.GotoActivity(self.pc.taskmanager,task=task,destination = (-10,0))
+            self.pc.addTask(task)
 
             self.t_ns = 0
 
