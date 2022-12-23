@@ -1,10 +1,6 @@
-import datetime
 from src.constants import *
+import src.log
 
-if LOGEVENTS:
-    with open(EVTLOGFILE, "w") as file:
-        now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        file.write("Event log started on: {}\n".format(now))
 _keysheld = []
 
 def keypress_wrapper(func):
@@ -25,18 +21,14 @@ def keyrelease_wrapper(func):
 def tkinter_event_wrapper(func):
     def inner(evt):
         evt.controller = evt.widget.controller
-        if LOGEVENTS:
-            with open(EVTLOGFILE,"a") as file:
-                file.write("[{:06.3f}] TKinter event: <{}>\n".format(evt.controller.t_ns/(1*10**9),str(evt)))
+        evt.controller.core.logger.write("TKinter event: <{}>\n".format(str(evt)))
         func(evt)
     return inner
 
 def task_event_wrapper(func):
     def inner(evt):
         evt.controller = evt.root.entity.controller
-        if LOGEVENTS:
-            with open(EVTLOGFILE,"a") as file:
-                file.write("[{:06.3f}] Task complete event: <{}>\n".format(evt.controller.t_ns/(1*10**9),str(evt)))
+        evt.controller.core.logger.write("Task complete event: <{}>\n".format(str(evt)))
         func(evt)
     return inner
 

@@ -1,3 +1,5 @@
+import os
+import datetime
 import math
 
 class CONSTANTOBJECT:
@@ -234,6 +236,9 @@ SAVEKEYS = ("name","seed","t_ns","worlds","entities","pc")
 
 TICKRATE = 100 # frequency in Hz at which the game runs one timestep
 
-LOGEVENTS = True
-LOGSFOLDER = "./logs/"
-EVTLOGFILE = LOGSFOLDER+"evtlogfile.txt"
+
+SCRIPTFOLDERPATH = os.path.dirname(__file__)
+LOGSFOLDERNAME = "logs"
+LOGSFOLDERPATH = os.path.join(SCRIPTFOLDERPATH,LOGSFOLDERNAME)
+EVTLOGFILENAME = "evtlog_" + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + ".txt"
+EVTLOGFILEPATH = os.path.join(LOGSFOLDERPATH,EVTLOGFILENAME)

@@ -65,7 +65,7 @@ class GUI(tk.Tk):
             self.controller.exportCurrentGame()
         else:
             print("Quitting...")
-        self.quit()
+        self.controller.core.exit()
 
     def bindEvents(
         self

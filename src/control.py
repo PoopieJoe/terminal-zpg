@@ -8,8 +8,11 @@ from src.constants import *
 
 class Controller:
     def __init__(
-        self
+        self,
+        core
     ):
+        self.core = core # link back to core container above
+
         self.worlds = []
         self.entities = []
 
