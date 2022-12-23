@@ -111,7 +111,7 @@ class Controller:
         
         os.system('cls' if os.name == 'nt' else 'clear') # clear terminal each update
 
-        print("[{:06.2f}] Time since last update: {:07.2f}ms".format(ns2s(self.t_ns),ns2ms(dt_ns)))
+        print("[{:06.2f}] Update rate: {:06.2f}Hz".format(ns2s(self.t_ns),1000/max(ns2ms(dt_ns),1)))
         for entity in self.entities:
             entity.update(dt=ns2s(dt_ns))
         return
