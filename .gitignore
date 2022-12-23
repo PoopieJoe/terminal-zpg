@@ -116,5 +116,5 @@ dmypy.json
 # Other
 .prof
 designstuff
-worlds/*
-logs/*
+worlds/
+logs/
