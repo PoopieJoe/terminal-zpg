@@ -109,7 +109,7 @@ class Controller:
         ns2s = lambda t : t/1000000000
         ns2ms = lambda t : t/1000000
         
-        os.system('cls' if os.name == 'nt' else 'clear') # clear terminal each update
+        # os.system('cls' if os.name == 'nt' else 'clear') # clear terminal each update
 
         print("[{:06.2f}] Update rate: {:06.2f}Hz".format(ns2s(self.t_ns),1000/max(ns2ms(dt_ns),1)))
         for entity in self.entities:
